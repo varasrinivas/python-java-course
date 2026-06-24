@@ -1,0 +1,42 @@
+{
+  "id": "23-pydantic",
+  "title": "Data Validation with pydantic",
+  "eyebrow": "Module 23",
+  "subtitle": "Bean Validation + Jackson, driven by type hints",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// POJO + Jackson + Bean Validation</span>\n<span class=\"kw\">public class</span> <span class=\"type\">User</span> {\n    <span class=\"dec\">@NotNull</span> <span class=\"kw\">private</span> <span class=\"type\">String</span> name;\n    <span class=\"dec\">@Email</span> <span class=\"kw\">private</span> <span class=\"type\">String</span> email;\n    <span class=\"dec\">@Min</span>(<span class=\"num\">0</span>) <span class=\"kw\">private</span> <span class=\"type\">int</span> age;\n    <span class=\"cm\">// + getters, setters, constructor...</span>\n}\n<span class=\"cm\">// ObjectMapper + Validator to parse & check</span>",
+      "python": "<span class=\"cm\"># One model: parsing + validation + types</span>\n<span class=\"kw\">from</span> pydantic <span class=\"kw\">import</span> <span class=\"type\">BaseModel</span>, <span class=\"type\">EmailStr</span>, <span class=\"type\">Field</span>\n\n<span class=\"kw\">class</span> <span class=\"type\">User</span>(<span class=\"type\">BaseModel</span>):\n    name: <span class=\"type\">str</span>\n    email: <span class=\"type\">EmailStr</span>\n    age: <span class=\"type\">int</span> = <span class=\"type\">Field</span>(ge=<span class=\"num\">0</span>)\n\n<span class=\"cm\"># Validate straight from a dict / JSON:</span>\nuser = <span class=\"type\">User</span>.<span class=\"fn\">model_validate</span>(payload)"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Your Type Hints Become the Schema",
+      "content": "pydantic reads the same annotations you'd write anyway and turns them into runtime <strong>parsing + validation + coercion</strong>. <code>User.model_validate(json_dict)</code> raises a precise <code>ValidationError</code> listing every bad field — the Jackson + Hibernate Validator combo, in one class with no getters/setters. <code>user.model_dump()</code> serializes back to a dict; <code>model_dump_json()</code> to JSON."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "pydantic Validates at Runtime — Plain Hints Don't",
+      "content": "Module 21 stressed that type hints are <em>not</em> enforced at runtime. pydantic is the exception that proves the rule: it <strong>actively checks</strong> values against the annotations when you construct or validate a model. So <code>User(age=\"oops\")</code> raises, while a normal class with <code>age: int</code> would happily store the string. Use pydantic at your system's boundaries (API input, config, message payloads); use plain dataclasses for trusted internal data."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Nested objects + custom validation</span>\n<span class=\"kw\">public class</span> <span class=\"type\">Order</span> {\n    <span class=\"dec\">@Valid</span> <span class=\"type\">List</span>&lt;<span class=\"type\">Item</span>&gt; items;\n    <span class=\"dec\">@AssertTrue</span>\n    <span class=\"kw\">boolean</span> <span class=\"fn\">hasItems</span>() { <span class=\"kw\">return</span> !items.isEmpty(); }\n}",
+      "python": "<span class=\"cm\"># Nested models + a field validator</span>\n<span class=\"kw\">from</span> pydantic <span class=\"kw\">import</span> field_validator\n\n<span class=\"kw\">class</span> <span class=\"type\">Order</span>(<span class=\"type\">BaseModel</span>):\n    items: <span class=\"type\">list</span>[<span class=\"type\">Item</span>]     <span class=\"cm\"># nested, auto-validated</span>\n\n    <span class=\"dec\">@field_validator</span>(<span class=\"str\">\"items\"</span>)\n    <span class=\"dec\">@classmethod</span>\n    <span class=\"kw\">def</span> <span class=\"fn\">not_empty</span>(cls, v):\n        <span class=\"kw\">if</span> <span class=\"kw\">not</span> v: <span class=\"kw\">raise</span> <span class=\"type\">ValueError</span>(<span class=\"str\">\"empty order\"</span>)\n        <span class=\"kw\">return</span> v"
+    },
+    {
+      "type": "quiz",
+      "question": "How does pydantic differ from a plain class with type hints?",
+      "options": [
+        "It doesn't — both ignore the annotations at runtime",
+        "pydantic enforces the annotations at runtime, parsing and validating values (and raising ValidationError)",
+        "pydantic only works inside FastAPI",
+        "pydantic removes the need for type hints"
+      ],
+      "correct": 1,
+      "explanation": "A normal class treats hints as inert documentation. A pydantic <code>BaseModel</code> uses them as a live schema — it coerces and validates input when you create or <code>model_validate</code> an instance, raising a detailed <code>ValidationError</code> on bad data. That makes it ideal for untrusted boundaries (API bodies, config, queue messages)."
+    }
+  ]
+}

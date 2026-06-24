@@ -1,0 +1,74 @@
+{
+  "id": "08-comprehensions-generators",
+  "title": "Comprehensions & Generators",
+  "eyebrow": "Module 08",
+  "subtitle": "Python's killer feature — Streams on steroids",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Stream pipeline: filter + map + collect</span>\n<span class=\"type\">List</span>&lt;<span class=\"type\">String</span>&gt; names = users.<span class=\"fn\">stream</span>()\n    .<span class=\"fn\">filter</span>(u -&gt; u.isActive())\n    .<span class=\"fn\">map</span>(<span class=\"type\">User</span>::getName)\n    .<span class=\"fn\">map</span>(<span class=\"type\">String</span>::toUpperCase)\n    .<span class=\"fn\">collect</span>(<span class=\"type\">Collectors</span>.<span class=\"fn\">toList</span>());",
+      "python": "<span class=\"cm\"># List comprehension: one readable line</span>\nnames = [\n    u.name.<span class=\"fn\">upper</span>()\n    <span class=\"kw\">for</span> u <span class=\"kw\">in</span> users\n    <span class=\"kw\">if</span> u.is_active\n]\n<span class=\"cm\"># map -&gt; expression, filter -&gt; if clause</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Comprehensions Replace Most Stream Pipelines",
+      "content": "The shape is <code>[expr for item in iterable if condition]</code>. The <em>expression</em> is your <code>.map()</code>, the <em>if clause</em> is your <code>.filter()</code>. For 80% of Stream pipelines this is shorter and faster (no stream setup overhead). Reach for <code>map()</code>/<code>filter()</code> functions or generators only when laziness matters."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Collectors.toMap / groupingBy</span>\n<span class=\"type\">Map</span>&lt;<span class=\"type\">String</span>, <span class=\"type\">Integer</span>&gt; lengths = words.<span class=\"fn\">stream</span>()\n    .<span class=\"fn\">collect</span>(<span class=\"type\">Collectors</span>.<span class=\"fn\">toMap</span>(\n        w -&gt; w, <span class=\"type\">String</span>::length));\n\n<span class=\"type\">Set</span>&lt;<span class=\"type\">Integer</span>&gt; unique = nums.<span class=\"fn\">stream</span>()\n    .<span class=\"fn\">collect</span>(<span class=\"type\">Collectors</span>.<span class=\"fn\">toSet</span>());",
+      "python": "<span class=\"cm\"># dict & set comprehensions too</span>\nlengths = {w: <span class=\"bi\">len</span>(w) <span class=\"kw\">for</span> w <span class=\"kw\">in</span> words}\n\nunique = {n <span class=\"kw\">for</span> n <span class=\"kw\">in</span> nums}\n\n<span class=\"cm\"># Nested: flatten a matrix</span>\nflat = [x <span class=\"kw\">for</span> row <span class=\"kw\">in</span> matrix <span class=\"kw\">for</span> x <span class=\"kw\">in</span> row]"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Dict and Set Comprehensions",
+      "content": "Same syntax, different brackets: <code>{k: v for ...}</code> builds a dict, <code>{x for ...}</code> builds a set. Nested loops read left-to-right: <code>[x for row in matrix for x in row]</code> is the outer loop first, then inner — the same order you'd nest <code>for</code> statements."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Lazy Stream — infinite, then limited</span>\n<span class=\"type\">Stream</span>.<span class=\"fn\">iterate</span>(<span class=\"num\">0</span>, n -&gt; n + <span class=\"num\">1</span>)\n    .<span class=\"fn\">filter</span>(n -&gt; n % <span class=\"num\">2</span> == <span class=\"num\">0</span>)\n    .<span class=\"fn\">limit</span>(<span class=\"num\">5</span>)\n    .<span class=\"fn\">forEach</span>(<span class=\"type\">System</span>.out::println);",
+      "python": "<span class=\"cm\"># Generator function: yield = lazy stream</span>\n<span class=\"kw\">def</span> <span class=\"fn\">evens</span>():\n    n = <span class=\"num\">0</span>\n    <span class=\"kw\">while</span> <span class=\"kw\">True</span>:\n        <span class=\"kw\">yield</span> n\n        n += <span class=\"num\">2</span>\n\n<span class=\"kw\">from</span> itertools <span class=\"kw\">import</span> islice\n<span class=\"kw\">for</span> n <span class=\"kw\">in</span> <span class=\"fn\">islice</span>(<span class=\"fn\">evens</span>(), <span class=\"num\">5</span>):\n    <span class=\"fn\">print</span>(n)"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "yield: Lazy Infinite Sequences for Free",
+      "content": "A function with <code>yield</code> is a <strong>generator</strong> — it produces values one at a time, pausing between them, like a lazy <code>Stream</code>. It uses constant memory regardless of sequence length, so it can model infinite series or stream a 10GB file line-by-line. <code>(x*x for x in nums)</code> with parentheses is a generator expression — lazy, not a list."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Generators Are Single-Use",
+      "content": "Once you iterate a generator to exhaustion, it's <strong>spent</strong> — looping again yields nothing. Unlike a <code>List</code> you can't re-walk it. If you need the values twice, materialize with <code>list(gen)</code> first. Same caveat applies to <code>map()</code>/<code>filter()</code> objects in Python 3 (they're lazy iterators, not lists)."
+    },
+    {
+      "type": "diagram",
+      "id": "comprehension-anatomy",
+      "title": "Anatomy of a Comprehension",
+      "svg": "<svg viewBox=\"0 0 700 160\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" style=\"max-width:660px;\"><rect x=\"20\" y=\"55\" width=\"660\" height=\"50\" rx=\"10\" fill=\"var(--surface2)\" stroke=\"#2a2e3d\"/><text x=\"40\" y=\"87\" fill=\"#89ddff\" font-family=\"JetBrains Mono\" font-size=\"16\">[</text><text x=\"60\" y=\"87\" fill=\"#82aaff\" font-family=\"JetBrains Mono\" font-size=\"16\">u.name.upper()</text><text x=\"230\" y=\"87\" fill=\"#c792ea\" font-family=\"JetBrains Mono\" font-size=\"16\">for</text><text x=\"275\" y=\"87\" fill=\"#e2e4ea\" font-family=\"JetBrains Mono\" font-size=\"16\">u</text><text x=\"300\" y=\"87\" fill=\"#c792ea\" font-family=\"JetBrains Mono\" font-size=\"16\">in</text><text x=\"335\" y=\"87\" fill=\"#e2e4ea\" font-family=\"JetBrains Mono\" font-size=\"16\">users</text><text x=\"415\" y=\"87\" fill=\"#c792ea\" font-family=\"JetBrains Mono\" font-size=\"16\">if</text><text x=\"450\" y=\"87\" fill=\"#c3e88d\" font-family=\"JetBrains Mono\" font-size=\"16\">u.is_active</text><text x=\"600\" y=\"87\" fill=\"#89ddff\" font-family=\"JetBrains Mono\" font-size=\"16\">]</text><text x=\"110\" y=\"130\" text-anchor=\"middle\" fill=\"#82aaff\" font-family=\"Inter\" font-size=\"11\">map (transform)</text><text x=\"330\" y=\"130\" text-anchor=\"middle\" fill=\"#a78bfa\" font-family=\"Inter\" font-size=\"11\">source iterable</text><text x=\"500\" y=\"130\" text-anchor=\"middle\" fill=\"#c3e88d\" font-family=\"Inter\" font-size=\"11\">filter (predicate)</text><text x=\"110\" y=\"40\" text-anchor=\"middle\" fill=\"#8b8fa3\" font-family=\"Inter\" font-size=\"10\">expression</text></svg>"
+    },
+    {
+      "type": "tab-group",
+      "title": "Concurrency &amp; the GIL",
+      "tabs": [
+        { "label": "The GIL", "content": "<div class=\"prose\"><p>Java threads run truly in parallel across cores. CPython has a <strong>Global Interpreter Lock</strong>: only one thread executes Python bytecode at a time. So <code>threading</code> helps <em>I/O-bound</em> work (waiting on network/disk) but gives <strong>no speedup for CPU-bound</strong> work.</p><pre><span class=\"cm\"># CPU-bound across 8 threads  ~= 1 thread (GIL-bound)</span>\n<span class=\"cm\"># I/O-bound across 8 threads  ~= 8x (threads wait, not compute)</span></pre><p>The instinct Java gave you — \"more threads = more CPU\" — does not hold in CPython.</p></div>" },
+        { "label": "Pick the tool", "content": "<div class=\"prose\"><pre><span class=\"cm\"># I/O-bound, async libs    -&gt; asyncio (1 thread, event loop)</span>\n<span class=\"cm\"># I/O-bound, blocking libs -&gt; threading (ThreadPoolExecutor)</span>\n<span class=\"cm\"># CPU-bound, real parallel -&gt; multiprocessing</span>\n\n<span class=\"kw\">from</span> concurrent.futures <span class=\"kw\">import</span> ProcessPoolExecutor\n<span class=\"kw\">with</span> <span class=\"fn\">ProcessPoolExecutor</span>() <span class=\"kw\">as</span> pool:\n    results = <span class=\"bi\">list</span>(pool.<span class=\"fn\">map</span>(heavy_compute, jobs))\n<span class=\"cm\"># Separate processes each get their own GIL</span></pre></div>" },
+        { "label": "async / await", "content": "<div class=\"prose\"><pre><span class=\"kw\">import</span> asyncio\n\n<span class=\"kw\">async def</span> <span class=\"fn\">fetch</span>(url: <span class=\"type\">str</span>) -&gt; <span class=\"type\">str</span>:\n    <span class=\"kw\">async with</span> session.<span class=\"fn\">get</span>(url) <span class=\"kw\">as</span> r:\n        <span class=\"kw\">return</span> <span class=\"kw\">await</span> r.<span class=\"fn\">text</span>()\n\n<span class=\"kw\">async def</span> <span class=\"fn\">main</span>():\n    <span class=\"cm\"># run many awaits concurrently on ONE thread</span>\n    pages = <span class=\"kw\">await</span> asyncio.<span class=\"fn\">gather</span>(*[<span class=\"fn\">fetch</span>(u) <span class=\"kw\">for</span> u <span class=\"kw\">in</span> urls])\n\nasyncio.<span class=\"fn\">run</span>(<span class=\"fn\">main</span>())</pre><p>A coroutine pauses at <code>await</code> just as a generator pauses at <code>yield</code> — same machinery. Closest Java analog: <code>CompletableFuture</code> or Loom virtual threads.</p></div>" }
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What's the key difference between `[x*x for x in nums]` and `(x*x for x in nums)`?",
+      "options": [
+        "Nothing — parentheses and brackets are interchangeable",
+        "The brackets build a list eagerly; the parentheses build a lazy generator",
+        "The parentheses version is a syntax error",
+        "The parentheses build a tuple"
+      ],
+      "correct": 1,
+      "explanation": "Square brackets create a <strong>list</strong> immediately (all values computed and stored). Parentheses create a <strong>generator expression</strong> — lazy, computing each value on demand, like a Java <code>Stream</code>. The generator uses constant memory and can be infinite, but is single-use."
+    }
+  ]
+}

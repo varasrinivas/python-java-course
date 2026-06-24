@@ -1,0 +1,58 @@
+{
+  "id": "22-essential-libraries",
+  "title": "Essential Libraries: requests & pandas",
+  "eyebrow": "Module 22",
+  "subtitle": "HTTP and data wrangling, the Python way",
+  "sections": [
+    {
+      "type": "prose",
+      "content": "<p>Unlike the previous modules, <code>requests</code> and <code>pandas</code> are <strong>third-party</strong> packages — install them into your venv (Module 10): <code>pip install requests pandas</code>. They're so ubiquitous in Python data/automation work that they're effectively part of the toolkit.</p>"
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// java.net.http HttpClient</span>\n<span class=\"type\">HttpClient</span> client = <span class=\"type\">HttpClient</span>.<span class=\"fn\">newHttpClient</span>();\n<span class=\"type\">HttpRequest</span> req = <span class=\"type\">HttpRequest</span>.<span class=\"fn\">newBuilder</span>()\n    .<span class=\"fn\">uri</span>(<span class=\"type\">URI</span>.<span class=\"fn\">create</span>(url))\n    .<span class=\"fn\">header</span>(<span class=\"str\">\"Authorization\"</span>, token)\n    .<span class=\"fn\">build</span>();\n<span class=\"type\">HttpResponse</span>&lt;<span class=\"type\">String</span>&gt; res = client.<span class=\"fn\">send</span>(\n    req, <span class=\"type\">BodyHandlers</span>.<span class=\"fn\">ofString</span>());\n<span class=\"cm\">// then parse JSON with Jackson...</span>",
+      "python": "<span class=\"cm\"># requests: one call, JSON built in</span>\n<span class=\"kw\">import</span> requests\n\nres = requests.<span class=\"fn\">get</span>(\n    url,\n    headers={<span class=\"str\">\"Authorization\"</span>: token},\n    timeout=<span class=\"num\">10</span>,\n)\nres.<span class=\"fn\">raise_for_status</span>()      <span class=\"cm\"># throw on 4xx/5xx</span>\ndata = res.<span class=\"fn\">json</span>()             <span class=\"cm\"># parsed dict, no Jackson</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Always Pass a timeout",
+      "content": "<code>requests</code> has <strong>no default timeout</strong> — a call can hang forever if the server stalls, exactly the kind of bug that takes down a worker. Always pass <code>timeout=</code>. Use a <code>requests.Session()</code> for connection pooling across many calls (the <code>HttpClient</code>-reuse equivalent), and call <code>raise_for_status()</code> to turn error responses into exceptions. For async workloads, <code>httpx</code> offers the same API with <code>await</code>."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// CSV → POJOs → stream aggregation</span>\n<span class=\"type\">List</span>&lt;<span class=\"type\">Sale</span>&gt; sales = readCsv(path);\n<span class=\"type\">Map</span>&lt;<span class=\"type\">String</span>, <span class=\"type\">Double</span>&gt; byRegion = sales.<span class=\"fn\">stream</span>()\n    .<span class=\"fn\">filter</span>(s -&gt; s.amount &gt; <span class=\"num\">0</span>)\n    .<span class=\"fn\">collect</span>(<span class=\"type\">Collectors</span>.<span class=\"fn\">groupingBy</span>(\n        <span class=\"type\">Sale</span>::region,\n        <span class=\"type\">Collectors</span>.<span class=\"fn\">summingDouble</span>(<span class=\"type\">Sale</span>::amount)));",
+      "python": "<span class=\"cm\"># pandas: vectorized, no POJOs, no loops</span>\n<span class=\"kw\">import</span> pandas <span class=\"kw\">as</span> pd\n\ndf = pd.<span class=\"fn\">read_csv</span>(path)\nby_region = (\n    df[df.amount &gt; <span class=\"num\">0</span>]\n    .<span class=\"fn\">groupby</span>(<span class=\"str\">\"region\"</span>)[<span class=\"str\">\"amount\"</span>]\n    .<span class=\"fn\">sum</span>()\n)"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "pandas Is the Data-Engineering Workhorse",
+      "content": "A <code>DataFrame</code> is a typed, columnar table — think a <code>List&lt;POJO&gt;</code> plus the entire Streams API, but vectorized in C for speed. <code>read_csv</code>/<code>read_parquet</code>/<code>read_sql</code> load data, then <code>filter</code>, <code>groupby</code>, <code>merge</code> (joins), and <code>pivot</code> replace hand-written stream pipelines. This is the single biggest reason Java teams adopt Python for analytics and ML feature work."
+    },
+    {
+      "type": "table",
+      "headers": ["Task", "Java", "Python"],
+      "rows": [
+        ["HTTP GET", "<code>HttpClient.send</code>", "<code>requests.get</code>"],
+        ["Parse JSON", "Jackson <code>ObjectMapper</code>", "<code>res.json()</code>"],
+        ["Read CSV", "OpenCSV / manual", "<code>pd.read_csv</code>"],
+        ["Filter rows", "<code>stream().filter</code>", "<code>df[df.col &gt; x]</code>"],
+        ["Group + aggregate", "<code>groupingBy</code>", "<code>df.groupby().sum()</code>"],
+        ["Join datasets", "manual / SQL", "<code>df.merge(other)</code>"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What's a critical argument to pass on every requests call in production?",
+      "options": [
+        "verify=False to skip SSL",
+        "timeout — requests has no default and can hang forever otherwise",
+        "stream=True always",
+        "encoding='utf-8'"
+      ],
+      "correct": 1,
+      "explanation": "<code>requests</code> blocks indefinitely by default if a server never responds, so always pass a <code>timeout</code>. (<code>verify=False</code> disables TLS verification — the opposite of what you want.) Pair it with <code>raise_for_status()</code> and a reusable <code>Session</code> for robust, efficient HTTP."
+    }
+  ]
+}

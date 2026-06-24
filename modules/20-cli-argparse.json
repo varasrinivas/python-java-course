@@ -1,0 +1,42 @@
+{
+  "id": "20-cli-argparse",
+  "title": "CLIs with argparse",
+  "eyebrow": "Module 20",
+  "subtitle": "From args[] parsing to a real command-line tool",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Hand-rolled args[] parsing</span>\n<span class=\"kw\">public static void</span> <span class=\"fn\">main</span>(<span class=\"type\">String</span>[] args) {\n    <span class=\"type\">String</span> path = args[<span class=\"num\">0</span>];\n    <span class=\"type\">int</span> limit = <span class=\"type\">Integer</span>.<span class=\"fn\">parseInt</span>(args[<span class=\"num\">1</span>]);\n    <span class=\"cm\">// no --help, no validation, no defaults</span>\n    <span class=\"cm\">// (or pull in picocli for annotations)</span>\n}",
+      "python": "<span class=\"cm\"># argparse: declarative, stdlib, batteries included</span>\n<span class=\"kw\">import</span> argparse\n\np = argparse.<span class=\"type\">ArgumentParser</span>(description=<span class=\"str\">\"Load rows\"</span>)\np.<span class=\"fn\">add_argument</span>(<span class=\"str\">\"path\"</span>)                       <span class=\"cm\"># positional</span>\np.<span class=\"fn\">add_argument</span>(<span class=\"str\">\"--limit\"</span>, type=<span class=\"type\">int</span>, default=<span class=\"num\">100</span>)\np.<span class=\"fn\">add_argument</span>(<span class=\"str\">\"--verbose\"</span>, action=<span class=\"str\">\"store_true\"</span>)\nargs = p.<span class=\"fn\">parse_args</span>()\n<span class=\"fn\">run</span>(args.path, args.limit)"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "--help, Types, and Validation for Free",
+      "content": "Declaring arguments gives you an auto-generated <code>--help</code> screen, type conversion (<code>type=int</code>), defaults, required flags, choices (<code>choices=[...]</code>), and clear usage errors — all from the stdlib, no dependency. <code>action=\"store_true\"</code> makes a boolean flag. It's the picocli experience without adding a library."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Subcommands need a framework (picocli)</span>\n<span class=\"dec\">@Command</span>(name = <span class=\"str\">\"db\"</span>, subcommands = {\n    <span class=\"type\">Migrate</span>.<span class=\"kw\">class</span>, <span class=\"type\">Seed</span>.<span class=\"kw\">class</span>\n})\n<span class=\"kw\">class</span> <span class=\"type\">Db</span> { }",
+      "python": "<span class=\"cm\"># Subcommands via add_subparsers (git-style)</span>\nsub = p.<span class=\"fn\">add_subparsers</span>(dest=<span class=\"str\">\"cmd\"</span>, required=<span class=\"kw\">True</span>)\nmigrate = sub.<span class=\"fn\">add_parser</span>(<span class=\"str\">\"migrate\"</span>)\nseed = sub.<span class=\"fn\">add_parser</span>(<span class=\"str\">\"seed\"</span>)\nseed.<span class=\"fn\">add_argument</span>(<span class=\"str\">\"--rows\"</span>, type=<span class=\"type\">int</span>)\n<span class=\"cm\"># dispatch on args.cmd</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "When to Reach Beyond the Stdlib",
+      "content": "<code>argparse</code> covers most tools, but for richer ergonomics the ecosystem favors <strong><code>typer</code></strong> (build a CLI from type-hinted function signatures — very FastAPI-like) or <strong><code>click</code></strong> (decorator-based). Pattern: prototype with <code>argparse</code>, graduate to <code>typer</code> when you want subcommands, shell completion, and less boilerplate. All read args from <code>sys.argv</code> under the hood."
+    },
+    {
+      "type": "quiz",
+      "question": "What does add_argument(\"--verbose\", action=\"store_true\") create?",
+      "options": [
+        "A required string option named verbose",
+        "A boolean flag: present → True, absent → False",
+        "A positional argument",
+        "An integer counter of how many times it appears"
+      ],
+      "correct": 1,
+      "explanation": "<code>action=\"store_true\"</code> defines a boolean flag — passing <code>--verbose</code> sets <code>args.verbose</code> to <code>True</code>, omitting it leaves <code>False</code>. No value is consumed after it. (For a repeat-count flag like <code>-vvv</code> you'd use <code>action=\"count\"</code>.)"
+    }
+  ]
+}

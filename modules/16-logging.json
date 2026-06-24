@@ -1,0 +1,55 @@
+{
+  "id": "16-logging",
+  "title": "Logging",
+  "eyebrow": "Module 16",
+  "subtitle": "The logging module is your SLF4J",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// SLF4J: one logger per class</span>\n<span class=\"kw\">import</span> org.slf4j.Logger;\n<span class=\"kw\">import</span> org.slf4j.LoggerFactory;\n\n<span class=\"kw\">private static final</span> <span class=\"type\">Logger</span> log =\n    <span class=\"type\">LoggerFactory</span>.<span class=\"fn\">getLogger</span>(<span class=\"type\">App</span>.<span class=\"kw\">class</span>);\n\nlog.<span class=\"fn\">info</span>(<span class=\"str\">\"Loaded {} rows\"</span>, count);",
+      "python": "<span class=\"cm\"># One logger per module, named __name__</span>\n<span class=\"kw\">import</span> logging\n\nlog = logging.<span class=\"fn\">getLogger</span>(__name__)\n\nlog.<span class=\"fn\">info</span>(<span class=\"str\">\"Loaded %s rows\"</span>, count)\n<span class=\"cm\"># %s args are formatted lazily — only if</span>\n<span class=\"cm\"># this level is actually enabled</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Don't print() for Diagnostics — and Configure Once",
+      "content": "<code>print()</code> is the Java equivalent of <code>System.out.println</code> debugging: no levels, no timestamps, no routing. Use <code>logging</code>. The key rule: <strong>libraries only call <code>getLogger(__name__)</code>; the application configures handlers once</strong> at startup via <code>logging.basicConfig(level=logging.INFO)</code>. Configuring logging inside library code (or calling <code>basicConfig</code> twice) is the classic mistake — mirror how you'd never call <code>BasicConfigurator</code> from a library in Java."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Use %s Args, Not f-strings, in Log Calls",
+      "content": "Write <code>log.debug(\"user=%s\", user)</code>, not <code>log.debug(f\"user={user}\")</code>. The <code>%s</code> form is formatted <strong>lazily</strong> — the string is only built if that level is enabled, just like SLF4J's <code>{}</code> placeholders. An f-string is evaluated eagerly every call, paying the cost even when <code>DEBUG</code> is off."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Config in logback.xml / log4j2.xml</span>\n<span class=\"cm\">// levels: TRACE DEBUG INFO WARN ERROR</span>\nlog.<span class=\"fn\">debug</span>(<span class=\"str\">\"detail\"</span>);\nlog.<span class=\"fn\">warn</span>(<span class=\"str\">\"degraded\"</span>);\nlog.<span class=\"fn\">error</span>(<span class=\"str\">\"failed\"</span>, exception);",
+      "python": "<span class=\"cm\"># Configure once at the entry point</span>\nlogging.<span class=\"fn\">basicConfig</span>(\n    level=logging.INFO,\n    format=<span class=\"str\">\"%(asctime)s %(levelname)s %(name)s: %(message)s\"</span>,\n)\nlog.<span class=\"fn\">debug</span>(<span class=\"str\">\"detail\"</span>)\nlog.<span class=\"fn\">warning</span>(<span class=\"str\">\"degraded\"</span>)\nlog.<span class=\"fn\">exception</span>(<span class=\"str\">\"failed\"</span>)   <span class=\"cm\"># inside except: adds traceback</span>"
+    },
+    {
+      "type": "table",
+      "headers": ["SLF4J / Logback", "Python logging", "Note"],
+      "rows": [
+        ["<code>LoggerFactory.getLogger</code>", "<code>logging.getLogger(__name__)</code>", "Per-module logger"],
+        ["<code>TRACE</code>", "— (use <code>DEBUG</code>)", "No TRACE level"],
+        ["<code>DEBUG/INFO/WARN/ERROR</code>", "<code>DEBUG/INFO/WARNING/ERROR</code>", "<code>WARNING</code> not WARN"],
+        ["<code>{}</code> placeholder", "<code>%s</code> arg", "Both lazy"],
+        ["<code>log.error(msg, ex)</code>", "<code>log.exception(msg)</code>", "Auto-attaches traceback"],
+        ["Appender", "Handler", "Where logs go"],
+        ["logback.xml", "<code>basicConfig</code> / <code>dictConfig</code>", "Configuration"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "Where should logging be configured (handlers, level, format) in a Python app?",
+      "options": [
+        "In every module that logs",
+        "Once, at the application entry point — libraries should only call getLogger()",
+        "Inside each function before it logs",
+        "It is configured automatically; you never call basicConfig"
+      ],
+      "correct": 1,
+      "explanation": "Just as you wouldn't configure Logback from inside a library, Python libraries should only obtain a logger with <code>getLogger(__name__)</code> and never configure handlers. The <strong>application</strong> sets level/format/handlers once at startup (e.g. <code>logging.basicConfig(...)</code> or <code>dictConfig</code>), keeping output control with the app that runs the code."
+    }
+  ]
+}

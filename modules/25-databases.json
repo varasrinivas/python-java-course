@@ -1,0 +1,65 @@
+{
+  "id": "25-databases",
+  "title": "Database Access",
+  "eyebrow": "Module 25",
+  "subtitle": "JDBC → DB-API, Hibernate → SQLAlchemy",
+  "sections": [
+    {
+      "type": "prose",
+      "content": "<p>Python's <strong>DB-API 2.0</strong> (PEP 249) is the <code>JDBC</code> of the Python world: one standard interface, many drivers. <code>sqlite3</code> ships with the stdlib; for real databases <code>pip install</code> a driver — <code>psycopg</code> (PostgreSQL), <code>mysqlclient</code> (MySQL), <code>asyncpg</code> (async Postgres). On top sits <strong>SQLAlchemy</strong>, the JPA/Hibernate analog.</p>"
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// JDBC: Connection, PreparedStatement, ResultSet</span>\n<span class=\"kw\">try</span> (<span class=\"type\">Connection</span> c = <span class=\"type\">DriverManager</span>.<span class=\"fn\">getConnection</span>(url);\n     <span class=\"type\">PreparedStatement</span> ps = c.<span class=\"fn\">prepareStatement</span>(\n         <span class=\"str\">\"SELECT name FROM users WHERE id = ?\"</span>)) {\n    ps.<span class=\"fn\">setLong</span>(<span class=\"num\">1</span>, id);\n    <span class=\"type\">ResultSet</span> rs = ps.<span class=\"fn\">executeQuery</span>();\n    <span class=\"kw\">if</span> (rs.<span class=\"fn\">next</span>()) name = rs.<span class=\"fn\">getString</span>(<span class=\"str\">\"name\"</span>);\n}",
+      "python": "<span class=\"cm\"># DB-API: connect -&gt; execute -&gt; fetch</span>\n<span class=\"kw\">import</span> sqlite3\n\n<span class=\"kw\">with</span> sqlite3.<span class=\"fn\">connect</span>(<span class=\"str\">\"app.db\"</span>) <span class=\"kw\">as</span> conn:\n    cur = conn.<span class=\"fn\">execute</span>(\n        <span class=\"str\">\"SELECT name FROM users WHERE id = ?\"</span>, (id,))\n    row = cur.<span class=\"fn\">fetchone</span>()\n    name = row[<span class=\"num\">0</span>] <span class=\"kw\">if</span> row <span class=\"kw\">else</span> <span class=\"kw\">None</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Use Placeholders — Never f-string Your SQL",
+      "content": "Building SQL with an f-string (<code>f\"... id = {id}\"</code>) is SQL injection — the same reason you reach for <code>PreparedStatement</code> over <code>Statement</code> in JDBC. Always pass values as a separate params tuple: <code>sqlite3</code> uses <code>?</code> placeholders, <code>psycopg</code> uses <code>%s</code>. That <code>%s</code> is a <strong>DB-API placeholder, not Python string formatting</strong> — leave it literal and let the driver bind and escape the value."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Manual transaction control</span>\n<span class=\"type\">Connection</span> c = ds.<span class=\"fn\">getConnection</span>();\n<span class=\"kw\">try</span> {\n    c.<span class=\"fn\">setAutoCommit</span>(<span class=\"kw\">false</span>);\n    c.<span class=\"fn\">prepareStatement</span>(<span class=\"str\">\"INSERT ...\"</span>).<span class=\"fn\">executeUpdate</span>();\n    c.<span class=\"fn\">commit</span>();\n} <span class=\"kw\">catch</span> (<span class=\"type\">SQLException</span> e) {\n    c.<span class=\"fn\">rollback</span>();\n}",
+      "python": "<span class=\"cm\"># The connection is a context manager:</span>\n<span class=\"cm\"># commit on success, rollback on exception</span>\n<span class=\"kw\">with</span> sqlite3.<span class=\"fn\">connect</span>(<span class=\"str\">\"app.db\"</span>) <span class=\"kw\">as</span> conn:\n    conn.<span class=\"fn\">execute</span>(\n        <span class=\"str\">\"INSERT INTO users(name) VALUES (?)\"</span>, (<span class=\"str\">\"Ada\"</span>,))\n    <span class=\"cm\"># committed automatically at block exit</span>\n<span class=\"cm\"># psycopg's connection works the same way</span>"
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// JPA entity + EntityManager</span>\n<span class=\"dec\">@Entity</span>\n<span class=\"kw\">class</span> <span class=\"type\">User</span> {\n    <span class=\"dec\">@Id</span> <span class=\"dec\">@GeneratedValue</span> <span class=\"type\">Long</span> id;\n    <span class=\"type\">String</span> name;\n}\n<span class=\"type\">User</span> u = em.<span class=\"fn\">find</span>(<span class=\"type\">User</span>.<span class=\"kw\">class</span>, id);\n<span class=\"type\">List</span>&lt;<span class=\"type\">User</span>&gt; hits = em.<span class=\"fn\">createQuery</span>(\n    <span class=\"str\">\"FROM User WHERE name = :n\"</span>, <span class=\"type\">User</span>.<span class=\"kw\">class</span>)\n    .<span class=\"fn\">setParameter</span>(<span class=\"str\">\"n\"</span>, name).<span class=\"fn\">getResultList</span>();",
+      "python": "<span class=\"cm\"># SQLAlchemy 2.0 ORM</span>\n<span class=\"kw\">from</span> sqlalchemy <span class=\"kw\">import</span> select\n<span class=\"kw\">from</span> sqlalchemy.orm <span class=\"kw\">import</span> <span class=\"type\">Session</span>, <span class=\"type\">Mapped</span>, mapped_column\n\n<span class=\"kw\">class</span> <span class=\"type\">User</span>(<span class=\"type\">Base</span>):\n    __tablename__ = <span class=\"str\">\"users\"</span>\n    id: <span class=\"type\">Mapped</span>[<span class=\"type\">int</span>] = <span class=\"fn\">mapped_column</span>(primary_key=<span class=\"kw\">True</span>)\n    name: <span class=\"type\">Mapped</span>[<span class=\"type\">str</span>]\n\n<span class=\"kw\">with</span> <span class=\"type\">Session</span>(engine) <span class=\"kw\">as</span> s:\n    u = s.<span class=\"fn\">get</span>(<span class=\"type\">User</span>, id)\n    hits = s.<span class=\"fn\">scalars</span>(<span class=\"fn\">select</span>(<span class=\"type\">User</span>).<span class=\"fn\">where</span>(<span class=\"type\">User</span>.name == name)).<span class=\"fn\">all</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Engine = DataSource; Core vs ORM",
+      "content": "<code>create_engine(\"postgresql+psycopg://...\")</code> builds a <strong>pooled engine</strong> — the connection-pool <code>DataSource</code> analog — that you create once and share. SQLAlchemy has two layers: <strong>Core</strong> (a composable SQL expression language, close to JDBC but type-safe and database-agnostic) and the <strong>ORM</strong> (mapped classes + <code>Session</code>, the Hibernate analog). Use the ORM for domain models, Core for bulk/ETL. For async, swap to <code>create_async_engine</code> + <code>AsyncSession</code> with <code>asyncpg</code> (Module 08)."
+    },
+    {
+      "type": "table",
+      "headers": ["Java (JDBC / JPA)", "Python", "Note"],
+      "rows": [
+        ["<code>DriverManager.getConnection</code>", "<code>sqlite3.connect</code> / <code>create_engine</code>", "Open / pool"],
+        ["<code>PreparedStatement</code> + <code>?</code>", "<code>execute(sql, params)</code>", "Parameterized"],
+        ["<code>ResultSet.next/getX</code>", "<code>cursor.fetchone/fetchall</code>", "Read rows"],
+        ["<code>DataSource</code> pool", "<code>create_engine(...)</code>", "Pooled engine"],
+        ["<code>@Entity</code>", "mapped class (<code>Base</code>)", "ORM model"],
+        ["<code>EntityManager</code>", "<code>Session</code>", "Unit of work"],
+        ["JPQL / Criteria", "<code>select(...).where(...)</code>", "Query builder"],
+        ["Postgres JDBC driver", "<code>psycopg</code> / <code>asyncpg</code>", "Drivers"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What is the correct, safe way to include a user-supplied id in a query?",
+      "options": [
+        "f\"SELECT * FROM users WHERE id = {id}\"",
+        "execute(\"SELECT * FROM users WHERE id = ?\", (id,)) — a placeholder plus a params tuple",
+        "Concatenate: \"... id = \" + str(id)",
+        "Escape the quotes in id manually first"
+      ],
+      "correct": 1,
+      "explanation": "Pass the value through the driver's <strong>placeholder</strong> (<code>?</code> for sqlite3, <code>%s</code> for psycopg) with the value in a separate params tuple — the DB-API equivalent of a JDBC <code>PreparedStatement</code>. Interpolating the value into the SQL string (f-string or concatenation) is the classic SQL-injection hole."
+    }
+  ]
+}

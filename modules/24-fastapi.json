@@ -1,0 +1,59 @@
+{
+  "id": "24-fastapi",
+  "title": "Web APIs with FastAPI",
+  "eyebrow": "Module 24",
+  "subtitle": "Spring Boot REST, with type hints doing the work",
+  "sections": [
+    {
+      "type": "prose",
+      "content": "<p>FastAPI is the Python web framework a Spring Boot developer feels at home in: declarative routes, dependency injection, and validation — but powered by type hints and pydantic (Module 23). Install into your venv: <code>pip install fastapi uvicorn</code>, then run with <code>uvicorn main:app --reload</code>.</p>"
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Spring Boot REST controller</span>\n<span class=\"dec\">@RestController</span>\n<span class=\"dec\">@RequestMapping</span>(<span class=\"str\">\"/items\"</span>)\n<span class=\"kw\">public class</span> <span class=\"type\">ItemController</span> {\n    <span class=\"dec\">@GetMapping</span>(<span class=\"str\">\"/{id}\"</span>)\n    <span class=\"kw\">public</span> <span class=\"type\">Item</span> <span class=\"fn\">get</span>(<span class=\"dec\">@PathVariable</span> <span class=\"type\">Long</span> id) {\n        <span class=\"kw\">return</span> service.<span class=\"fn\">find</span>(id);\n    }\n}",
+      "python": "<span class=\"cm\"># FastAPI app + path operation</span>\n<span class=\"kw\">from</span> fastapi <span class=\"kw\">import</span> <span class=\"type\">FastAPI</span>\n\napp = <span class=\"type\">FastAPI</span>()\n\n<span class=\"dec\">@app.get</span>(<span class=\"str\">\"/items/{id}\"</span>)\n<span class=\"kw\">def</span> <span class=\"fn\">get_item</span>(id: <span class=\"type\">int</span>) -&gt; <span class=\"type\">Item</span>:\n    <span class=\"kw\">return</span> service.<span class=\"fn\">find</span>(id)\n<span class=\"cm\"># id is parsed &amp; validated as int from the path</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Type Hints Drive Routing, Validation, and Docs",
+      "content": "FastAPI reads your signature: <code>id: int</code> parses and validates the path param (a bad value returns a clean 422, like <code>@Valid</code> failing). A pydantic model parameter becomes the validated JSON body. Best of all, FastAPI auto-generates interactive <strong>OpenAPI/Swagger docs at <code>/docs</code></strong> — the Springdoc experience, but free and always in sync, because the types <em>are</em> the schema."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Body binding + DI + query params</span>\n<span class=\"dec\">@PostMapping</span>\n<span class=\"kw\">public</span> <span class=\"type\">Item</span> <span class=\"fn\">create</span>(\n    <span class=\"dec\">@Valid</span> <span class=\"dec\">@RequestBody</span> <span class=\"type\">ItemIn</span> body,\n    <span class=\"dec\">@RequestParam</span>(defaultValue = <span class=\"str\">\"false\"</span>) <span class=\"kw\">boolean</span> dry,\n    <span class=\"type\">Db</span> db) {            <span class=\"cm\">// injected bean</span>\n    <span class=\"kw\">return</span> db.<span class=\"fn\">save</span>(body);\n}",
+      "python": "<span class=\"cm\"># body = pydantic model, dep = Depends()</span>\n<span class=\"kw\">from</span> fastapi <span class=\"kw\">import</span> <span class=\"type\">Depends</span>\n\n<span class=\"dec\">@app.post</span>(<span class=\"str\">\"/items\"</span>)\n<span class=\"kw\">def</span> <span class=\"fn\">create</span>(\n    body: <span class=\"type\">ItemIn</span>,                 <span class=\"cm\"># validated JSON body</span>\n    dry: <span class=\"type\">bool</span> = <span class=\"kw\">False</span>,            <span class=\"cm\"># query param ?dry=</span>\n    db: <span class=\"type\">Db</span> = <span class=\"type\">Depends</span>(get_db),    <span class=\"cm\"># injected dependency</span>\n) -&gt; <span class=\"type\">Item</span>:\n    <span class=\"kw\">return</span> db.<span class=\"fn\">save</span>(body)"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Depends() Is FastAPI's @Autowired",
+      "content": "<code>Depends(get_db)</code> declares a dependency that FastAPI resolves and injects per request — your DB session, current user, settings, etc. Dependencies can themselves depend on others (a graph, like Spring beans), and a dependency that <code>yield</code>s runs teardown after the response (Module 19's context-manager pattern). FastAPI is fully <code>async</code>: declare <code>async def</code> handlers to await DB/HTTP calls without blocking the event loop (Module 08)."
+    },
+    {
+      "type": "table",
+      "headers": ["Spring Boot", "FastAPI", "Note"],
+      "rows": [
+        ["<code>@RestController</code>", "<code>FastAPI()</code> app", "App object, not class"],
+        ["<code>@GetMapping</code>", "<code>@app.get</code>", "Route decorator"],
+        ["<code>@PathVariable</code>", "<code>id: int</code> in path", "Typed param"],
+        ["<code>@RequestBody @Valid</code>", "pydantic model param", "Auto-validated body"],
+        ["<code>@RequestParam</code>", "default-valued param", "Query string"],
+        ["<code>@Autowired</code>", "<code>Depends(...)</code>", "Dependency injection"],
+        ["Springdoc Swagger", "<code>/docs</code> (built in)", "Auto OpenAPI"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "How does FastAPI know to validate an incoming JSON body and generate its schema?",
+      "options": [
+        "You write a separate OpenAPI YAML file",
+        "From a pydantic-model-typed parameter on the handler — the type hints are the schema",
+        "It validates everything as strings by default",
+        "You annotate the class with @RequestBody"
+      ],
+      "correct": 1,
+      "explanation": "Declaring a parameter typed as a pydantic <code>BaseModel</code> tells FastAPI to parse and validate the request body against it (returning 422 on bad data) and to publish that structure in the auto-generated OpenAPI docs at <code>/docs</code>. The type hints do the work — no separate schema file, no <code>@RequestBody</code> needed."
+    }
+  ]
+}

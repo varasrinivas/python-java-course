@@ -1,0 +1,76 @@
+{
+  "id": "04-control-flow",
+  "title": "Control Flow",
+  "eyebrow": "Module 04",
+  "subtitle": "if/for/while — same logic, cleaner syntax",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Parens + braces required</span>\n<span class=\"kw\">if</span> (score &gt;= <span class=\"num\">90</span>) {\n    grade = <span class=\"str\">\"A\"</span>;\n} <span class=\"kw\">else if</span> (score &gt;= <span class=\"num\">80</span>) {\n    grade = <span class=\"str\">\"B\"</span>;\n} <span class=\"kw\">else</span> {\n    grade = <span class=\"str\">\"C\"</span>;\n}",
+      "python": "<span class=\"cm\"># Colon + indentation, elif keyword</span>\n<span class=\"kw\">if</span> score &gt;= <span class=\"num\">90</span>:\n    grade = <span class=\"str\">\"A\"</span>\n<span class=\"kw\">elif</span> score &gt;= <span class=\"num\">80</span>:\n    grade = <span class=\"str\">\"B\"</span>\n<span class=\"kw\">else</span>:\n    grade = <span class=\"str\">\"C\"</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "No Ternary Operator — Use the Conditional Expression",
+      "content": "Python has no <code>cond ? a : b</code>. The equivalent reads like English and flips the order: <code>grade = \"A\" if score &gt;= 90 else \"B\"</code>. The value-if-true comes first, then the condition, then the else value."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Index-based or enhanced for</span>\n<span class=\"kw\">for</span> (<span class=\"type\">int</span> i = <span class=\"num\">0</span>; i &lt; items.<span class=\"fn\">size</span>(); i++) {\n    <span class=\"type\">System</span>.out.<span class=\"fn\">println</span>(i + <span class=\"str\">\": \"</span> + items.<span class=\"fn\">get</span>(i));\n}\n<span class=\"kw\">for</span> (<span class=\"type\">String</span> item : items) {\n    process(item);\n}",
+      "python": "<span class=\"cm\"># for-in iterates values directly</span>\n<span class=\"kw\">for</span> item <span class=\"kw\">in</span> items:\n    <span class=\"fn\">process</span>(item)\n\n<span class=\"cm\"># Need the index too? enumerate()</span>\n<span class=\"kw\">for</span> i, item <span class=\"kw\">in</span> <span class=\"bi\">enumerate</span>(items):\n    <span class=\"fn\">print</span>(<span class=\"str\">f\"{i}: {item}\"</span>)"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "enumerate(), zip(), and range()",
+      "content": "Forget C-style index loops. <code>enumerate(seq)</code> gives <code>(index, value)</code> pairs. <code>zip(a, b)</code> walks two sequences in lockstep. <code>range(5)</code> is <code>0..4</code>, <code>range(2, 10, 2)</code> steps by 2. These three cover nearly every loop you'd ever write a counter for in Java."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Modern switch (Java 17+ pattern matching)</span>\n<span class=\"type\">String</span> kind = <span class=\"kw\">switch</span> (shape) {\n    <span class=\"kw\">case</span> <span class=\"type\">Circle</span> c -&gt; <span class=\"str\">\"round\"</span>;\n    <span class=\"kw\">case</span> <span class=\"type\">Square</span> s -&gt; <span class=\"str\">\"boxy\"</span>;\n    <span class=\"kw\">default</span> -&gt; <span class=\"str\">\"unknown\"</span>;\n};",
+      "python": "<span class=\"cm\"># match/case — structural pattern matching (3.10+)</span>\n<span class=\"kw\">match</span> shape:\n    <span class=\"kw\">case</span> <span class=\"type\">Circle</span>():\n        kind = <span class=\"str\">\"round\"</span>\n    <span class=\"kw\">case</span> <span class=\"type\">Square</span>():\n        kind = <span class=\"str\">\"boxy\"</span>\n    <span class=\"kw\">case</span> _:\n        kind = <span class=\"str\">\"unknown\"</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "match Is More Powerful Than switch",
+      "content": "Python's <code>match</code> can destructure: <code>case Point(x=0, y=y)</code> binds <code>y</code> while matching <code>x == 0</code>. It matches sequences <code>case [first, *rest]</code> and dicts <code>case {\"role\": \"admin\"}</code>. The wildcard <code>case _</code> is the default. There's no fall-through, so no <code>break</code> needed."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// for-else has no equivalent — use a flag</span>\n<span class=\"kw\">boolean</span> found = <span class=\"kw\">false</span>;\n<span class=\"kw\">for</span> (<span class=\"type\">String</span> s : items) {\n    <span class=\"kw\">if</span> (s.<span class=\"fn\">equals</span>(target)) { found = <span class=\"kw\">true</span>; <span class=\"kw\">break</span>; }\n}\n<span class=\"kw\">if</span> (!found) { handleMissing(); }",
+      "python": "<span class=\"cm\"># for-else: else runs if loop did NOT break</span>\n<span class=\"kw\">for</span> s <span class=\"kw\">in</span> items:\n    <span class=\"kw\">if</span> s == target:\n        <span class=\"fn\">handle</span>(s)\n        <span class=\"kw\">break</span>\n<span class=\"kw\">else</span>:\n    <span class=\"fn\">handle_missing</span>()   <span class=\"cm\"># no break happened</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Truthiness: Empty Collections Are Falsy",
+      "content": "Python treats <code>0</code>, <code>\"\"</code>, <code>[]</code>, <code>{}</code>, and <code>None</code> as falsy. So <code>if items:</code> means \"if the list is non-empty\" — idiomatic and preferred over <code>if len(items) &gt; 0</code>. But beware: <code>if x:</code> when <code>x</code> could legitimately be <code>0</code> may skip valid data. Use <code>if x is not None:</code> when you mean \"present\"."
+    },
+    {
+      "type": "table",
+      "headers": ["Java", "Python", "Notes"],
+      "rows": [
+        ["<code>cond ? a : b</code>", "<code>a if cond else b</code>", "Order flips"],
+        ["<code>for(;;)</code>", "<code>while True:</code>", "Infinite loop"],
+        ["<code>i++</code>", "<code>i += 1</code>", "No <code>++</code> operator"],
+        ["<code>&&</code> / <code>||</code> / <code>!</code>", "<code>and</code> / <code>or</code> / <code>not</code>", "Words, not symbols"],
+        ["<code>continue</code> / <code>break</code>", "<code>continue</code> / <code>break</code>", "Identical"],
+        ["labeled break", "— (refactor to function)", "No labeled breaks"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What does `\"A\" if score >= 90 else \"B\"` correspond to in Java?",
+      "options": [
+        "An if-else statement that must be on separate lines",
+        "The ternary `score >= 90 ? \"A\" : \"B\"`",
+        "A switch expression",
+        "Nothing — Python can't do inline conditionals"
+      ],
+      "correct": 1,
+      "explanation": "It's Python's conditional expression, the direct analog of Java's ternary <code>score >= 90 ? \"A\" : \"B\"</code> — but written value-first: the result if true, then <code>if condition</code>, then <code>else</code> result."
+    }
+  ]
+}

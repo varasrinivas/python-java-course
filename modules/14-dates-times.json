@@ -1,0 +1,55 @@
+{
+  "id": "14-dates-times",
+  "title": "Dates & Times",
+  "eyebrow": "Module 14",
+  "subtitle": "datetime is your java.time",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// java.time — immutable, fluent</span>\n<span class=\"kw\">import</span> java.time.*;\n\n<span class=\"type\">LocalDate</span> today = <span class=\"type\">LocalDate</span>.<span class=\"fn\">now</span>();\n<span class=\"type\">LocalDate</span> later = today.<span class=\"fn\">plusDays</span>(<span class=\"num\">30</span>);\n<span class=\"type\">Instant</span> nowUtc = <span class=\"type\">Instant</span>.<span class=\"fn\">now</span>();\n<span class=\"type\">Duration</span> d = <span class=\"type\">Duration</span>.<span class=\"fn\">ofHours</span>(<span class=\"num\">5</span>);",
+      "python": "<span class=\"cm\"># datetime — also immutable</span>\n<span class=\"kw\">from</span> datetime <span class=\"kw\">import</span> datetime, date, timedelta, timezone\n\ntoday = date.<span class=\"fn\">today</span>()\nlater = today + <span class=\"fn\">timedelta</span>(days=<span class=\"num\">30</span>)   <span class=\"cm\"># + operator!</span>\nnow_utc = datetime.<span class=\"fn\">now</span>(timezone.utc)\nd = <span class=\"fn\">timedelta</span>(hours=<span class=\"num\">5</span>)"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "timedelta Does Arithmetic With Operators",
+      "content": "Where Java uses <code>plusDays</code>/<code>minus</code>, Python overloads <code>+</code> and <code>-</code>: <code>deadline = now + timedelta(days=7)</code>, and subtracting two datetimes yields a <code>timedelta</code> you can read as <code>.days</code> / <code>.total_seconds()</code>. Parse ISO 8601 with <code>datetime.fromisoformat(s)</code> and emit it with <code>.isoformat()</code> — the analog of <code>DateTimeFormatter.ISO_INSTANT</code>."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "datetime.now() Is Naive — and That Bites",
+      "content": "<code>datetime.now()</code> returns a <strong>naive</strong> datetime with no timezone, unlike Java's <code>Instant</code> which is always UTC. Naive and aware datetimes can't be compared or subtracted, and naive ones silently assume \"local time.\" Always make server/data timestamps aware: <code>datetime.now(timezone.utc)</code>. For named zones use <code>zoneinfo.ZoneInfo(\"America/New_York\")</code> (the <code>ZoneId</code> analog, stdlib since 3.9)."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Parse & format with a formatter</span>\n<span class=\"type\">DateTimeFormatter</span> fmt =\n    <span class=\"type\">DateTimeFormatter</span>.<span class=\"fn\">ofPattern</span>(<span class=\"str\">\"yyyy-MM-dd\"</span>);\n<span class=\"type\">LocalDate</span> d = <span class=\"type\">LocalDate</span>.<span class=\"fn\">parse</span>(<span class=\"str\">\"2026-06-24\"</span>, fmt);\n<span class=\"type\">String</span> s = d.<span class=\"fn\">format</span>(fmt);",
+      "python": "<span class=\"cm\"># strptime parses, strftime formats</span>\nd = datetime.<span class=\"fn\">strptime</span>(<span class=\"str\">\"2026-06-24\"</span>, <span class=\"str\">\"%Y-%m-%d\"</span>)\ns = d.<span class=\"fn\">strftime</span>(<span class=\"str\">\"%Y-%m-%d\"</span>)\n<span class=\"cm\"># For ISO 8601, skip the pattern entirely:</span>\nd = datetime.<span class=\"fn\">fromisoformat</span>(<span class=\"str\">\"2026-06-24\"</span>)"
+    },
+    {
+      "type": "table",
+      "headers": ["java.time", "Python datetime", "Purpose"],
+      "rows": [
+        ["<code>LocalDate</code>", "<code>date</code>", "Date, no time"],
+        ["<code>LocalDateTime</code>", "<code>datetime</code> (naive)", "Date + time, no zone"],
+        ["<code>ZonedDateTime</code>", "<code>datetime</code> + <code>tzinfo</code>", "Aware datetime"],
+        ["<code>Instant</code>", "<code>datetime.now(timezone.utc)</code>", "UTC moment"],
+        ["<code>Duration</code> / <code>Period</code>", "<code>timedelta</code>", "Span of time"],
+        ["<code>ZoneId</code>", "<code>zoneinfo.ZoneInfo</code>", "Named timezone"],
+        ["<code>DateTimeFormatter</code>", "<code>strftime</code>/<code>strptime</code>", "Format / parse"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "Why prefer datetime.now(timezone.utc) over datetime.now()?",
+      "options": [
+        "It's faster",
+        "now() returns a naive datetime (no tz); the aware UTC form avoids comparison errors and ambiguous local-time bugs",
+        "now() is deprecated",
+        "Only the utc form can be formatted"
+      ],
+      "correct": 1,
+      "explanation": "<code>datetime.now()</code> is <strong>naive</strong> — it carries no timezone, unlike Java's always-UTC <code>Instant</code>. Naive and timezone-aware datetimes can't be compared or subtracted, and naive values silently assume local time. Using <code>datetime.now(timezone.utc)</code> gives an unambiguous, aware timestamp."
+    }
+  ]
+}

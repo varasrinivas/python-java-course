@@ -1,0 +1,42 @@
+{
+  "id": "17-enums",
+  "title": "Enums",
+  "eyebrow": "Module 17",
+  "subtitle": "enum.Enum — familiar, with a few twists",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Java enum: constants + optional fields</span>\n<span class=\"kw\">public enum</span> <span class=\"type\">Status</span> {\n    ACTIVE, SUSPENDED, CLOSED\n}\n\n<span class=\"type\">Status</span> s = <span class=\"type\">Status</span>.ACTIVE;\ns.<span class=\"fn\">name</span>();      <span class=\"cm\">// \"ACTIVE\"</span>\n<span class=\"type\">Status</span>.<span class=\"fn\">valueOf</span>(<span class=\"str\">\"CLOSED\"</span>);",
+      "python": "<span class=\"cm\"># Subclass Enum; values are explicit</span>\n<span class=\"kw\">from</span> enum <span class=\"kw\">import</span> <span class=\"type\">Enum</span>, auto\n\n<span class=\"kw\">class</span> <span class=\"type\">Status</span>(<span class=\"type\">Enum</span>):\n    ACTIVE = auto()\n    SUSPENDED = auto()\n    CLOSED = auto()\n\ns = <span class=\"type\">Status</span>.ACTIVE\ns.name           <span class=\"cm\"># \"ACTIVE\" (attribute, no parens)</span>\n<span class=\"type\">Status</span>[<span class=\"str\">\"CLOSED\"</span>]   <span class=\"cm\"># by name, like valueOf</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Members Have a Name AND a Value",
+      "content": "Each member wraps a <code>.name</code> (the identifier) and a <code>.value</code> (what you assigned — <code>auto()</code> gives 1, 2, 3…). Look up by name with <code>Status[\"CLOSED\"]</code> and by value with <code>Status(3)</code> — note the different brackets. Members are <strong>singletons</strong>, so compare with <code>is</code> (<code>if s is Status.ACTIVE</code>) or <code>==</code>; never compare against the raw value unless you pulled <code>.value</code>."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Enum with data + behavior</span>\n<span class=\"kw\">public enum</span> <span class=\"type\">Planet</span> {\n    EARTH(<span class=\"num\">5.97e24</span>), MARS(<span class=\"num\">6.42e23</span>);\n    <span class=\"kw\">final double</span> mass;\n    <span class=\"type\">Planet</span>(<span class=\"type\">double</span> m) { mass = m; }\n    <span class=\"type\">double</span> <span class=\"fn\">mass</span>() { <span class=\"kw\">return</span> mass; }\n}",
+      "python": "<span class=\"cm\"># Value can be a tuple; add methods freely</span>\n<span class=\"kw\">class</span> <span class=\"type\">Planet</span>(<span class=\"type\">Enum</span>):\n    EARTH = <span class=\"num\">5.97e24</span>\n    MARS = <span class=\"num\">6.42e23</span>\n\n    <span class=\"kw\">def</span> <span class=\"fn\">gravity</span>(<span class=\"self\">self</span>) -&gt; <span class=\"type\">float</span>:\n        <span class=\"kw\">return</span> <span class=\"num\">6.67e-11</span> * <span class=\"self\">self</span>.value\n\n<span class=\"type\">Planet</span>.EARTH.<span class=\"fn\">gravity</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "IntEnum and StrEnum for Interop",
+      "content": "Plain <code>Enum</code> members are <em>not</em> equal to their raw values (<code>Status.ACTIVE != 1</code>). When you need an enum that doubles as an <code>int</code> or <code>str</code> for JSON/DB/serialization, subclass <code>IntEnum</code> or <code>StrEnum</code> (3.11+): then <code>Color.RED == \"RED\"</code> is <code>True</code> and it serializes transparently. Use <code>@enum.unique</code> to forbid duplicate values, and iterate members simply with <code>for s in Status:</code>."
+    },
+    {
+      "type": "quiz",
+      "question": "How do you compare an enum member to check which one it is, idiomatically?",
+      "options": [
+        "Compare to the integer value: s == 1",
+        "Use identity or equality against the member: s is Status.ACTIVE",
+        "Call s.equals(Status.ACTIVE)",
+        "Compare the string: s == \"ACTIVE\""
+      ],
+      "correct": 1,
+      "explanation": "Enum members are singletons, so the idiomatic check is <code>s is Status.ACTIVE</code> (or <code>==</code>). Comparing to the raw value (<code>1</code> or <code>\"ACTIVE\"</code>) fails for a plain <code>Enum</code> — that only works if you deliberately subclass <code>IntEnum</code>/<code>StrEnum</code>. There's no <code>.equals()</code> in Python."
+    }
+  ]
+}

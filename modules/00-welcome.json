@@ -1,0 +1,41 @@
+{
+  "id": "00-welcome",
+  "title": "Your Java → Python Bridge",
+  "eyebrow": "Welcome",
+  "subtitle": "Everything you know still applies — just with less typing",
+  "sections": [
+    {
+      "type": "concept-map",
+      "title": "What Changes, What Stays",
+      "content": "<div style=\"display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; text-align:center;\"><div style=\"background:rgba(52,211,153,0.08); border:1px solid rgba(52,211,153,0.25); border-radius:10px; padding:16px;\"><div style=\"color:var(--green); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; margin-bottom:8px;\">SAME CONCEPTS</div><div style=\"font-size:13px; color:var(--text-dim);\">OOP, exceptions, iterators, modules, lambdas, generics (typing), decorators (annotations)</div></div><div style=\"background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.25); border-radius:10px; padding:16px;\"><div style=\"color:var(--yellow); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; margin-bottom:8px;\">DIFFERENT SYNTAX</div><div style=\"font-size:13px; color:var(--text-dim);\">No braces → indentation, no semicolons, <code>def</code> not types, <code>self</code> explicit</div></div><div style=\"background:rgba(167,139,250,0.08); border:1px solid rgba(167,139,250,0.25); border-radius:10px; padding:16px;\"><div style=\"color:var(--accent); font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px; margin-bottom:8px;\">NEW SUPERPOWERS</div><div style=\"font-size:13px; color:var(--text-dim);\">List comprehensions, duck typing, generators, unpacking, REPL, f-strings, slicing</div></div></div>"
+    },
+    {
+      "type": "prose",
+      "content": "<p>This course is structured as 12 focused modules. Each maps a Java concept you already know to its Python equivalent with side-by-side code, visual diagrams, and \"gotcha\" alerts for the tricky differences.</p><p>Your 20+ years of Java experience means you don't need to learn <em>programming</em> — you just need to learn Python's <em>dialect</em>. Think of it as learning Portuguese when you already speak Spanish.</p>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Your Advantage",
+      "content": "Most Python tutorials waste time on \"what is a variable?\" — you can skip straight to the patterns. Each module here assumes you understand the Java side cold and focuses on the delta."
+    },
+    {
+      "type": "table",
+      "headers": ["Java Concept", "Python Equivalent", "Module"],
+      "rows": [
+        ["Class / public static void main", "Script / <code>if __name__</code>", "1"],
+        ["Primitive types + String", "Everything is an object", "2"],
+        ["ArrayList, HashMap", "list, dict (built-in)", "3"],
+        ["for / while / switch", "for-in, while, match", "4"],
+        ["methods, overloading", "def, *args, **kwargs", "5"],
+        ["class, extends, implements", "class, inheritance, ABC", "6"],
+        ["try-catch-finally", "try-except-finally", "7"],
+        ["Streams API", "List comprehensions + generators", "8"],
+        ["java.io / java.nio", "open(), pathlib, os", "9"],
+        ["Maven / Gradle", "pip, venv, pyproject.toml", "10"],
+        ["Annotations + Reflection", "Decorators + inspect", "11"],
+        ["JUnit, Mockito", "pytest, unittest.mock", "12"]
+      ]
+    }
+  ]
+}

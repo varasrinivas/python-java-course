@@ -1,0 +1,81 @@
+{
+  "id": "05-functions",
+  "title": "Functions & Arguments",
+  "eyebrow": "Module 05",
+  "subtitle": "def replaces method signatures — and adds superpowers",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Type-first signature, return type required</span>\n<span class=\"kw\">public</span> <span class=\"type\">double</span> <span class=\"fn\">discount</span>(<span class=\"type\">double</span> price, <span class=\"type\">double</span> pct) {\n    <span class=\"kw\">return</span> price * (<span class=\"num\">1</span> - pct);\n}\n\n<span class=\"cm\">// Overloading for optional args</span>\n<span class=\"kw\">public</span> <span class=\"type\">double</span> <span class=\"fn\">discount</span>(<span class=\"type\">double</span> price) {\n    <span class=\"kw\">return</span> <span class=\"fn\">discount</span>(price, <span class=\"num\">0.1</span>);\n}",
+      "python": "<span class=\"cm\"># def, name-first, hints after the colon</span>\n<span class=\"kw\">def</span> <span class=\"fn\">discount</span>(price: <span class=\"type\">float</span>, pct: <span class=\"type\">float</span> = <span class=\"num\">0.1</span>) -&gt; <span class=\"type\">float</span>:\n    <span class=\"kw\">return</span> price * (<span class=\"num\">1</span> - pct)\n\n<span class=\"cm\"># Default values replace overloading entirely</span>\n<span class=\"fn\">discount</span>(<span class=\"num\">100</span>)         <span class=\"cm\"># uses pct=0.1</span>\n<span class=\"fn\">discount</span>(<span class=\"num\">100</span>, <span class=\"num\">0.2</span>)    <span class=\"cm\"># override</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Keyword Arguments Kill Overloading",
+      "content": "Python has <strong>no method overloading</strong> — and rarely needs it. Default parameter values plus keyword arguments cover the cases. Call <code>discount(price=100, pct=0.2)</code> by name for self-documenting calls. One <code>def</code> replaces a whole family of Java overloads."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "The #1 Python Bug: Mutable Default Arguments",
+      "content": "<code>def add(item, bucket=[]):</code> is a trap. The default <code>[]</code> is created <strong>once</strong> at definition time and <em>shared across all calls</em> — so it accumulates across invocations. Always use <code>None</code> as the sentinel: <code>def add(item, bucket=None): bucket = bucket or []</code>. This bites every Java dev exactly once."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Varargs</span>\n<span class=\"kw\">public</span> <span class=\"type\">int</span> <span class=\"fn\">sum</span>(<span class=\"type\">int</span>... nums) {\n    <span class=\"type\">int</span> total = <span class=\"num\">0</span>;\n    <span class=\"kw\">for</span> (<span class=\"type\">int</span> n : nums) total += n;\n    <span class=\"kw\">return</span> total;\n}\n<span class=\"cm\">// No clean keyword-args equivalent</span>",
+      "python": "<span class=\"cm\"># *args = varargs, **kwargs = keyword map</span>\n<span class=\"kw\">def</span> <span class=\"fn\">sum_all</span>(*nums: <span class=\"type\">int</span>) -&gt; <span class=\"type\">int</span>:\n    <span class=\"kw\">return</span> <span class=\"bi\">sum</span>(nums)\n\n<span class=\"kw\">def</span> <span class=\"fn\">configure</span>(**opts: <span class=\"type\">str</span>) -&gt; <span class=\"kw\">None</span>:\n    <span class=\"kw\">for</span> key, val <span class=\"kw\">in</span> opts.<span class=\"fn\">items</span>():\n        <span class=\"fn\">print</span>(<span class=\"str\">f\"{key}={val}\"</span>)\n<span class=\"fn\">configure</span>(host=<span class=\"str\">\"db\"</span>, port=<span class=\"str\">\"5432\"</span>)"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Functions Are First-Class Objects",
+      "content": "Unlike Java (where you need a <code>Function</code>/<code>Supplier</code> interface or method reference), Python functions are plain objects. Assign them, pass them, return them: <code>handlers = {\"json\": parse_json, \"csv\": parse_csv}</code> then <code>handlers[fmt](data)</code>. No functional interface ceremony."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Lambda needs a functional interface</span>\n<span class=\"type\">Function</span>&lt;<span class=\"type\">Integer</span>, <span class=\"type\">Integer</span>&gt; sq = x -&gt; x * x;\nlist.<span class=\"fn\">stream</span>()\n    .<span class=\"fn\">filter</span>(x -&gt; x &gt; <span class=\"num\">0</span>)\n    .<span class=\"fn\">map</span>(sq)\n    .<span class=\"fn\">collect</span>(<span class=\"type\">Collectors</span>.<span class=\"fn\">toList</span>());",
+      "python": "<span class=\"cm\"># lambda is a bare expression — no interface</span>\nsq = <span class=\"kw\">lambda</span> x: x * x\n<span class=\"cm\"># But comprehensions usually read better:</span>\nresult = [x * x <span class=\"kw\">for</span> x <span class=\"kw\">in</span> nums <span class=\"kw\">if</span> x &gt; <span class=\"num\">0</span>]\n<span class=\"cm\"># lambdas shine as sort keys:</span>\nusers.<span class=\"fn\">sort</span>(key=<span class=\"kw\">lambda</span> u: u.age)"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Lambdas Are One Expression Only",
+      "content": "Python <code>lambda</code> can't contain statements — no <code>if/return</code> blocks, no multiple lines. If your lambda wants a body, just use a named <code>def</code> (they're cheap and can be nested). Most Java Stream pipelines become Python <strong>comprehensions</strong> (Module 08), not lambda chains."
+    },
+    {
+      "type": "tab-group",
+      "title": "Functional Programming Toolkit",
+      "tabs": [
+        { "label": "Closures", "content": "<div class=\"prose\"><pre><span class=\"cm\"># A closure remembers the enclosing scope</span>\n<span class=\"kw\">def</span> <span class=\"fn\">multiplier</span>(factor: <span class=\"type\">int</span>):\n    <span class=\"kw\">def</span> <span class=\"fn\">multiply</span>(n: <span class=\"type\">int</span>) -&gt; <span class=\"type\">int</span>:\n        <span class=\"kw\">return</span> n * factor   <span class=\"cm\"># factor is captured</span>\n    <span class=\"kw\">return</span> multiply\n\ntriple = <span class=\"fn\">multiplier</span>(<span class=\"num\">3</span>)\ntriple(<span class=\"num\">10</span>)   <span class=\"cm\"># 30</span></pre><p>Java lambdas may only capture <strong>effectively-final</strong> variables. Python closures can even reassign a captured name with <code>nonlocal</code> — a true closure over mutable state.</p></div>" },
+        { "label": "functools", "content": "<div class=\"prose\"><pre><span class=\"kw\">from</span> functools <span class=\"kw\">import</span> reduce, partial, lru_cache\n\n<span class=\"cm\"># reduce == Stream.reduce</span>\ntotal = <span class=\"fn\">reduce</span>(<span class=\"kw\">lambda</span> a, b: a + b, nums, <span class=\"num\">0</span>)\n\n<span class=\"cm\"># partial pre-binds arguments (currying)</span>\nlocal_db = <span class=\"fn\">partial</span>(connect, <span class=\"str\">\"localhost\"</span>)\nlocal_db(<span class=\"num\">5432</span>)   <span class=\"cm\"># connect(\"localhost\", 5432)</span>\n\n<span class=\"dec\">@lru_cache</span>   <span class=\"cm\"># automatic memoization</span>\n<span class=\"kw\">def</span> <span class=\"fn\">fib</span>(n): <span class=\"kw\">return</span> n <span class=\"kw\">if</span> n &lt; <span class=\"num\">2</span> <span class=\"kw\">else</span> <span class=\"fn\">fib</span>(n-<span class=\"num\">1</span>) + <span class=\"fn\">fib</span>(n-<span class=\"num\">2</span>)</pre></div>" },
+        { "label": "operator & map", "content": "<div class=\"prose\"><pre><span class=\"kw\">from</span> operator <span class=\"kw\">import</span> attrgetter, itemgetter\n\n<span class=\"cm\"># Named functions for sort keys</span>\nusers.<span class=\"fn\">sort</span>(key=<span class=\"fn\">attrgetter</span>(<span class=\"str\">\"age\"</span>))   <span class=\"cm\"># ~ User::getAge</span>\nrows.<span class=\"fn\">sort</span>(key=<span class=\"fn\">itemgetter</span>(<span class=\"num\">0</span>))       <span class=\"cm\"># by column 0</span>\n\n<span class=\"cm\"># map/filter exist but are lazy iterators</span>\nnames = <span class=\"bi\">list</span>(<span class=\"bi\">map</span>(<span class=\"type\">str</span>.upper, raw))\n<span class=\"cm\"># Prefer a comprehension when you'd write a lambda:</span>\nnames = [r.<span class=\"fn\">upper</span>() <span class=\"kw\">for</span> r <span class=\"kw\">in</span> raw]</pre></div>" },
+        { "label": "Full pipeline", "content": "<div class=\"prose\"><pre><span class=\"kw\">from</span> functools <span class=\"kw\">import</span> reduce\n\n<span class=\"cm\"># Compose filter -&gt; map -&gt; reduce: no loops, no mutation</span>\npaid    = <span class=\"bi\">filter</span>(<span class=\"kw\">lambda</span> o: o[<span class=\"str\">\"paid\"</span>], orders)\namounts = <span class=\"bi\">map</span>(<span class=\"kw\">lambda</span> o: o[<span class=\"str\">\"amount\"</span>], paid)\ntotal   = <span class=\"fn\">reduce</span>(<span class=\"kw\">lambda</span> a, b: a + b, amounts, <span class=\"num\">0.0</span>)\n\n<span class=\"cm\"># Same result, idiomatic Python (comprehension):</span>\ntotal = <span class=\"bi\">sum</span>(o[<span class=\"str\">\"amount\"</span>] <span class=\"kw\">for</span> o <span class=\"kw\">in</span> orders <span class=\"kw\">if</span> o[<span class=\"str\">\"paid\"</span>])</pre><p>A complete functional pipeline built from pure functions and lazy <code>map</code>/<code>filter</code>, folded with <code>reduce</code> — the direct analog of Java's <code>orders.stream().filter(...).mapToDouble(...).sum()</code>.</p></div>" }
+      ]
+    },
+    {
+      "type": "table",
+      "headers": ["Feature", "Java", "Python"],
+      "rows": [
+        ["Define", "<code>type name(args){}</code>", "<code>def name(args):</code>"],
+        ["Optional arg", "overload", "<code>x=default</code>"],
+        ["Varargs", "<code>int... xs</code>", "<code>*xs</code>"],
+        ["Named map args", "— (builder)", "<code>**kwargs</code>"],
+        ["Lambda", "<code>x -> x*2</code>", "<code>lambda x: x*2</code>"],
+        ["Call by name", "—", "<code>f(pct=0.2)</code>"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "Why is `def append_to(item, target=[]):` considered a bug?",
+      "options": [
+        "Lists can't be default arguments in Python",
+        "The default list is created once and shared across all calls, accumulating values",
+        "It's a syntax error without a type hint",
+        "target must come before item"
+      ],
+      "correct": 1,
+      "explanation": "Default argument values are evaluated <strong>once</strong>, when the function is defined — not on each call. So a mutable default like <code>[]</code> is the <em>same</em> object every call and accumulates state. The fix: default to <code>None</code> and create a fresh list inside the body."
+    }
+  ]
+}

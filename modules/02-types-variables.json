@@ -1,0 +1,67 @@
+{
+  "id": "02-types-variables",
+  "title": "Types & Variables",
+  "eyebrow": "Module 02",
+  "subtitle": "From static typing to dynamic — but not lawless",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Declared type, fixed forever</span>\n<span class=\"type\">int</span> count = <span class=\"num\">42</span>;\n<span class=\"type\">String</span> name = <span class=\"str\">\"Ada\"</span>;\n<span class=\"kw\">final</span> <span class=\"type\">double</span> RATE = <span class=\"num\">0.05</span>;\n\n<span class=\"cm\">// Reassigning to wrong type = compile error</span>\ncount = <span class=\"str\">\"oops\"</span>; <span class=\"cm\">// ✗ won't compile</span>",
+      "python": "<span class=\"cm\"># No type keyword — inferred at runtime</span>\ncount = <span class=\"num\">42</span>\nname = <span class=\"str\">\"Ada\"</span>\nRATE = <span class=\"num\">0.05</span>  <span class=\"cm\"># UPPER = convention for const</span>\n\n<span class=\"cm\"># Names are just labels — rebind freely</span>\ncount = <span class=\"str\">\"oops\"</span>  <span class=\"cm\"># ✓ legal, count is now a str</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Variables Are Labels, Not Boxes",
+      "content": "In Java, a variable <em>is</em> a typed slot in memory. In Python, a variable is just a <strong>name bound to an object</strong>. <code>x = 5</code> doesn't put 5 into a box called x — it points the name x at an int object. This is why <code>a = b</code> for a list makes both names point at the <em>same</em> list. See Module 03 for the aliasing gotcha."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Primitives vs boxed objects</span>\n<span class=\"type\">int</span> x = <span class=\"num\">5</span>;          <span class=\"cm\">// primitive</span>\n<span class=\"type\">Integer</span> y = <span class=\"num\">5</span>;      <span class=\"cm\">// boxed object</span>\n<span class=\"type\">long</span> big = <span class=\"num\">9_000_000_000L</span>;\n<span class=\"cm\">// int overflows silently at 2^31</span>\n<span class=\"type\">int</span> overflow = <span class=\"type\">Integer</span>.MAX_VALUE + <span class=\"num\">1</span>;",
+      "python": "<span class=\"cm\"># Everything is an object — no primitives</span>\nx = <span class=\"num\">5</span>              <span class=\"cm\"># int (full object)</span>\ny = <span class=\"num\">5</span>              <span class=\"cm\"># same — no boxing</span>\nbig = <span class=\"num\">9_000_000_000</span>  <span class=\"cm\"># no L suffix</span>\n<span class=\"cm\"># ints are arbitrary precision — never overflow</span>\nhuge = <span class=\"num\">2</span> ** <span class=\"num\">200</span>     <span class=\"cm\"># just works</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Type Hints: Documentation That Tools Check",
+      "content": "Python type hints (<code>x: int</code>) are <strong>not enforced at runtime</strong> — the interpreter ignores them. They exist for your IDE, for <code>mypy</code>/<code>pyright</code> static checkers, and for human readers. Think of them like Java generics that the JVM erases — present in source, gone at execution. Per this course's rules, use them everywhere."
+    },
+    {
+      "type": "table",
+      "headers": ["Java Type", "Python Type", "Note"],
+      "rows": [
+        ["<code>int</code> / <code>long</code>", "<code>int</code>", "Arbitrary precision, no overflow"],
+        ["<code>double</code> / <code>float</code>", "<code>float</code>", "Always 64-bit double"],
+        ["<code>boolean</code>", "<code>bool</code>", "<code>True</code> / <code>False</code> (capitalized)"],
+        ["<code>String</code>", "<code>str</code>", "Immutable, Unicode by default"],
+        ["<code>char</code>", "— (use <code>str</code> len 1)", "No separate char type"],
+        ["<code>null</code>", "<code>None</code>", "A singleton, not a type"],
+        ["<code>Object</code>", "<code>object</code>", "Root of all types"],
+        ["<code>BigDecimal</code>", "<code>decimal.Decimal</code>", "For exact money math"]
+      ]
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// == compares references for objects</span>\n<span class=\"type\">String</span> a = <span class=\"kw\">new</span> <span class=\"type\">String</span>(<span class=\"str\">\"hi\"</span>);\n<span class=\"type\">String</span> b = <span class=\"kw\">new</span> <span class=\"type\">String</span>(<span class=\"str\">\"hi\"</span>);\na == b;          <span class=\"cm\">// false (different refs)</span>\na.<span class=\"fn\">equals</span>(b);     <span class=\"cm\">// true (value equal)</span>",
+      "python": "<span class=\"cm\"># == compares VALUES, is compares identity</span>\na = <span class=\"str\">\"hi\"</span>\nb = <span class=\"str\">\"hi\"</span>\na == b           <span class=\"cm\"># True (value equal)</span>\na <span class=\"kw\">is</span> b           <span class=\"cm\"># identity — like Java ==</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "== and is Are Swapped From Your Instinct",
+      "content": "In Java, <code>==</code> is identity and <code>.equals()</code> is value. In Python it's flipped: <code>==</code> is <strong>value</strong> equality (calls <code>__eq__</code>, like <code>.equals()</code>) and <code>is</code> is <strong>identity</strong> (same object in memory). Use <code>is</code> only for singletons: <code>if x is None</code>, never <code>if x == None</code>."
+    },
+    {
+      "type": "quiz",
+      "question": "What does `0.1 + 0.2 == 0.3` evaluate to in Python?",
+      "options": [
+        "True — Python uses exact decimals",
+        "False — floats are IEEE-754, same as Java's double",
+        "It raises a TypeError",
+        "True only with type hints enabled"
+      ],
+      "correct": 1,
+      "explanation": "Python's <code>float</code> is a 64-bit IEEE-754 double — exactly like Java's <code>double</code>. So <code>0.1 + 0.2</code> is <code>0.30000000000000004</code> and the comparison is <code>False</code>. For exact money math, use <code>decimal.Decimal</code> just as you'd reach for <code>BigDecimal</code> in Java."
+    }
+  ]
+}

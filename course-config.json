@@ -1,0 +1,237 @@
+{
+  "title": "Python for Java Developers",
+  "subtitle": "Everything you know still applies — just with less typing",
+  "version": "1.0.0",
+  "author": "AI-Assisted Course Builder",
+  "fonts": {
+    "display": "Space Grotesk",
+    "body": "Inter",
+    "code": "JetBrains Mono"
+  },
+  "sidebarGroups": {
+    "Getting Started": ["00-welcome"],
+    "Core Language": [
+      "01-program-structure",
+      "02-types-variables",
+      "03-collections",
+      "04-control-flow",
+      "05-functions"
+    ],
+    "Advanced Patterns": [
+      "06-oop-classes",
+      "07-exception-handling",
+      "08-comprehensions-generators"
+    ],
+    "Ecosystem": [
+      "09-file-io",
+      "10-packages-environments",
+      "11-decorators",
+      "12-testing"
+    ],
+    "Standard Library & Toolkit": [
+      "13-strings-formatting",
+      "14-dates-times",
+      "15-collections-module",
+      "16-logging",
+      "17-enums",
+      "18-regex"
+    ],
+    "Pro Tooling & Patterns": [
+      "19-context-managers",
+      "20-cli-argparse",
+      "21-typing-deep-dive"
+    ],
+    "Real-World Stack": [
+      "22-essential-libraries",
+      "23-pydantic",
+      "24-fastapi",
+      "25-databases"
+    ]
+  },
+  "moduleOrder": [
+    "00-welcome",
+    "01-program-structure",
+    "02-types-variables",
+    "03-collections",
+    "04-control-flow",
+    "05-functions",
+    "06-oop-classes",
+    "07-exception-handling",
+    "08-comprehensions-generators",
+    "09-file-io",
+    "10-packages-environments",
+    "11-decorators",
+    "12-testing",
+    "13-strings-formatting",
+    "14-dates-times",
+    "15-collections-module",
+    "16-logging",
+    "17-enums",
+    "18-regex",
+    "19-context-managers",
+    "20-cli-argparse",
+    "21-typing-deep-dive",
+    "22-essential-libraries",
+    "23-pydantic",
+    "24-fastapi",
+    "25-databases"
+  ],
+  "modules": {
+    "00-welcome": {
+      "title": "Your Java → Python Bridge",
+      "eyebrow": "Welcome",
+      "subtitle": "Everything you know still applies — just with less typing",
+      "status": "complete"
+    },
+    "01-program-structure": {
+      "title": "Program Structure & Entry Points",
+      "eyebrow": "Module 01",
+      "subtitle": "From public static void main to a clean script",
+      "status": "complete"
+    },
+    "02-types-variables": {
+      "title": "Types & Variables",
+      "eyebrow": "Module 02",
+      "subtitle": "From static typing to dynamic — but not lawless",
+      "status": "complete"
+    },
+    "03-collections": {
+      "title": "Collections & Data Structures",
+      "eyebrow": "Module 03",
+      "subtitle": "Built-in batteries: list, dict, set, tuple",
+      "status": "complete"
+    },
+    "04-control-flow": {
+      "title": "Control Flow",
+      "eyebrow": "Module 04",
+      "subtitle": "if/for/while — same logic, cleaner syntax",
+      "status": "complete"
+    },
+    "05-functions": {
+      "title": "Functions & Arguments",
+      "eyebrow": "Module 05",
+      "subtitle": "def replaces method signatures — and adds superpowers",
+      "status": "complete"
+    },
+    "06-oop-classes": {
+      "title": "OOP & Classes",
+      "eyebrow": "Module 06",
+      "subtitle": "Same principles, explicit self, and multiple inheritance",
+      "status": "complete"
+    },
+    "07-exception-handling": {
+      "title": "Exception Handling",
+      "eyebrow": "Module 07",
+      "subtitle": "try-except — no checked exceptions, no throws clause",
+      "status": "complete"
+    },
+    "08-comprehensions-generators": {
+      "title": "Comprehensions & Generators",
+      "eyebrow": "Module 08",
+      "subtitle": "Python's killer feature — Streams on steroids",
+      "status": "complete"
+    },
+    "09-file-io": {
+      "title": "File I/O & Paths",
+      "eyebrow": "Module 09",
+      "subtitle": "pathlib is your new java.nio.file.Path",
+      "status": "complete"
+    },
+    "10-packages-environments": {
+      "title": "Packages, Modules & Environments",
+      "eyebrow": "Module 10",
+      "subtitle": "pip + venv = your Maven/Gradle equivalent",
+      "status": "complete"
+    },
+    "11-decorators": {
+      "title": "Decorators & Metaprogramming",
+      "eyebrow": "Module 11",
+      "subtitle": "Java annotations that actually run code",
+      "status": "complete"
+    },
+    "12-testing": {
+      "title": "Testing with pytest",
+      "eyebrow": "Module 12",
+      "subtitle": "JUnit patterns → pytest patterns, with less ceremony",
+      "status": "complete"
+    },
+    "13-strings-formatting": {
+      "title": "Strings & Formatting",
+      "eyebrow": "Module 13",
+      "subtitle": "f-strings retire String.format and StringBuilder",
+      "status": "complete"
+    },
+    "14-dates-times": {
+      "title": "Dates & Times",
+      "eyebrow": "Module 14",
+      "subtitle": "datetime is your java.time",
+      "status": "complete"
+    },
+    "15-collections-module": {
+      "title": "The collections Module",
+      "eyebrow": "Module 15",
+      "subtitle": "defaultdict, Counter, namedtuple, deque",
+      "status": "complete"
+    },
+    "16-logging": {
+      "title": "Logging",
+      "eyebrow": "Module 16",
+      "subtitle": "The logging module is your SLF4J",
+      "status": "complete"
+    },
+    "17-enums": {
+      "title": "Enums",
+      "eyebrow": "Module 17",
+      "subtitle": "enum.Enum — familiar, with a few twists",
+      "status": "complete"
+    },
+    "18-regex": {
+      "title": "Regular Expressions",
+      "eyebrow": "Module 18",
+      "subtitle": "The re module is your Pattern/Matcher",
+      "status": "complete"
+    },
+    "19-context-managers": {
+      "title": "Context Managers",
+      "eyebrow": "Module 19",
+      "subtitle": "Author your own try-with-resources",
+      "status": "complete"
+    },
+    "20-cli-argparse": {
+      "title": "CLIs with argparse",
+      "eyebrow": "Module 20",
+      "subtitle": "From args[] parsing to a real command-line tool",
+      "status": "complete"
+    },
+    "21-typing-deep-dive": {
+      "title": "Typing Deep Dive",
+      "eyebrow": "Module 21",
+      "subtitle": "Generics, TypeVar, and mypy — static checks, opt-in",
+      "status": "complete"
+    },
+    "22-essential-libraries": {
+      "title": "Essential Libraries: requests & pandas",
+      "eyebrow": "Module 22",
+      "subtitle": "HTTP and data wrangling, the Python way",
+      "status": "complete"
+    },
+    "23-pydantic": {
+      "title": "Data Validation with pydantic",
+      "eyebrow": "Module 23",
+      "subtitle": "Bean Validation + Jackson, driven by type hints",
+      "status": "complete"
+    },
+    "24-fastapi": {
+      "title": "Web APIs with FastAPI",
+      "eyebrow": "Module 24",
+      "subtitle": "Spring Boot REST, with type hints doing the work",
+      "status": "complete"
+    },
+    "25-databases": {
+      "title": "Database Access",
+      "eyebrow": "Module 25",
+      "subtitle": "JDBC → DB-API, Hibernate → SQLAlchemy",
+      "status": "complete"
+    }
+  }
+}

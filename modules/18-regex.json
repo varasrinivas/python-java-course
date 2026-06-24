@@ -1,0 +1,55 @@
+{
+  "id": "18-regex",
+  "title": "Regular Expressions",
+  "eyebrow": "Module 18",
+  "subtitle": "The re module is your Pattern/Matcher",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Pattern + Matcher</span>\n<span class=\"kw\">import</span> java.util.regex.*;\n\n<span class=\"type\">Pattern</span> p = <span class=\"type\">Pattern</span>.<span class=\"fn\">compile</span>(<span class=\"str\">\"\\\\d{3}-\\\\d{4}\"</span>);\n<span class=\"type\">Matcher</span> m = p.<span class=\"fn\">matcher</span>(text);\n<span class=\"kw\">if</span> (m.<span class=\"fn\">find</span>()) {\n    <span class=\"type\">String</span> hit = m.<span class=\"fn\">group</span>();\n}",
+      "python": "<span class=\"cm\"># re.search scans anywhere in the string</span>\n<span class=\"kw\">import</span> re\n\npattern = re.<span class=\"fn\">compile</span>(<span class=\"str\">r\"\\d{3}-\\d{4}\"</span>)   <span class=\"cm\"># raw string!</span>\nm = pattern.<span class=\"fn\">search</span>(text)\n<span class=\"kw\">if</span> m:\n    hit = m.<span class=\"fn\">group</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Always Use Raw Strings — and search() vs match()",
+      "content": "Write patterns as raw strings: <code>r\"\\d+\"</code>. Without the <code>r</code>, Python's own string layer eats the backslashes (you'd need <code>\"\\\\d+\"</code> like Java). Second trap: <code>re.match()</code> anchors at the <strong>start</strong> of the string (it does <em>not</em> mean Java's <code>matches()</code>), while <code>re.search()</code> scans anywhere — the analog of <code>Matcher.find()</code>. For a full-string match use <code>re.fullmatch()</code>."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Groups, replace-all</span>\n<span class=\"type\">Pattern</span> p = <span class=\"type\">Pattern</span>.<span class=\"fn\">compile</span>(<span class=\"str\">\"(\\\\w+)@(\\\\w+)\"</span>);\n<span class=\"type\">Matcher</span> m = p.<span class=\"fn\">matcher</span>(s);\n<span class=\"kw\">if</span> (m.<span class=\"fn\">find</span>()) m.<span class=\"fn\">group</span>(<span class=\"num\">1</span>);   <span class=\"cm\">// user</span>\n<span class=\"type\">String</span> out = s.<span class=\"fn\">replaceAll</span>(<span class=\"str\">\"\\\\s+\"</span>, <span class=\"str\">\" \"</span>);",
+      "python": "<span class=\"cm\"># Named groups + re.sub</span>\nm = re.<span class=\"fn\">search</span>(<span class=\"str\">r\"(?P&lt;user&gt;\\w+)@(?P&lt;host&gt;\\w+)\"</span>, s)\n<span class=\"kw\">if</span> m:\n    m.<span class=\"fn\">group</span>(<span class=\"str\">\"user\"</span>)        <span class=\"cm\"># by name</span>\n    m.<span class=\"fn\">groupdict</span>()           <span class=\"cm\"># {'user':..,'host':..}</span>\nout = re.<span class=\"fn\">sub</span>(<span class=\"str\">r\"\\s+\"</span>, <span class=\"str\">\" \"</span>, s)   <span class=\"cm\"># replaceAll</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "findall, finditer, and Named Groups",
+      "content": "<code>re.findall(pattern, text)</code> returns every match as a list in one call — no <code>while (m.find())</code> loop. <code>re.finditer</code> yields match objects lazily for richer access. Named groups <code>(?P&lt;name&gt;...)</code> plus <code>m.groupdict()</code> turn a regex straight into a structured dict — perfect for parsing log lines or IDs in a data pipeline. Compile once with <code>re.compile</code> if you reuse the pattern in a loop."
+    },
+    {
+      "type": "table",
+      "headers": ["Java regex", "Python re", "Note"],
+      "rows": [
+        ["<code>Pattern.compile(p)</code>", "<code>re.compile(p)</code>", "Reusable pattern"],
+        ["<code>m.find()</code>", "<code>re.search()</code>", "Match anywhere"],
+        ["<code>m.matches()</code>", "<code>re.fullmatch()</code>", "Whole string"],
+        ["<code>m.lookingAt()</code>", "<code>re.match()</code>", "Anchored at start"],
+        ["<code>m.group(1)</code>", "<code>m.group(1)</code> / by name", "Capture groups"],
+        ["<code>s.replaceAll(p,r)</code>", "<code>re.sub(p,r,s)</code>", "Replace all"],
+        ["<code>\"\\\\d\"</code>", "<code>r\"\\d\"</code>", "Use raw strings"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What does re.match(r\"\\d+\", text) do that surprises Java developers?",
+      "options": [
+        "It matches the whole string like Java's matches()",
+        "It only anchors at the START of the string — use re.search() to match anywhere",
+        "It returns a boolean, not a match object",
+        "It requires the pattern to be compiled first"
+      ],
+      "correct": 1,
+      "explanation": "Despite the name, <code>re.match()</code> is <strong>not</strong> Java's <code>matches()</code> — it anchors only at the <em>start</em> of the string (closer to <code>Matcher.lookingAt()</code>). To find a match anywhere use <code>re.search()</code> (≈ <code>find()</code>); to require the entire string match use <code>re.fullmatch()</code>."
+    }
+  ]
+}

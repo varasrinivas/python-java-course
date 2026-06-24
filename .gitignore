@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Local agent / editor config (not part of the course)
+.claude/
+
+# Browser-verification artifacts
+.playwright-mcp/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*.swp
+*.log
+
+# Credentials / secrets (defensive — none are committed)
+.env
+.env.*
+*.pem
+*.key
+**/credentials
+.aws/

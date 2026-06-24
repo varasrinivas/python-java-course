@@ -1,0 +1,72 @@
+{
+  "id": "11-decorators",
+  "title": "Decorators & Metaprogramming",
+  "eyebrow": "Module 11",
+  "subtitle": "Java annotations that actually run code",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Annotations are metadata — inert by themselves</span>\n<span class=\"dec\">@Override</span>\n<span class=\"dec\">@Deprecated</span>\n<span class=\"kw\">public</span> <span class=\"type\">String</span> <span class=\"fn\">legacy</span>() { ... }\n\n<span class=\"cm\">// A framework must reflectively read them</span>\n<span class=\"cm\">// (Spring, JUnit) for them to DO anything</span>",
+      "python": "<span class=\"cm\"># Decorators ARE functions that wrap functions</span>\n<span class=\"dec\">@cache</span>\n<span class=\"dec\">@log_calls</span>\n<span class=\"kw\">def</span> <span class=\"fn\">legacy</span>() -&gt; <span class=\"type\">str</span>:\n    ...\n\n<span class=\"cm\"># @log_calls actively replaces legacy with</span>\n<span class=\"cm\"># a wrapped version — no framework needed</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Decorators Run Code; Annotations Are Just Tags",
+      "content": "Java annotations are passive metadata — a framework (Spring, JUnit) must use reflection to find and act on them. A Python decorator is an <strong>active function</strong> that takes the decorated function and returns a replacement. <code>@log_calls</code> literally does <code>legacy = log_calls(legacy)</code>. The behavior is in the decorator itself, no runtime container required."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Cross-cutting concern via Spring AOP</span>\n<span class=\"dec\">@Cacheable</span>(<span class=\"str\">\"users\"</span>)\n<span class=\"kw\">public</span> <span class=\"type\">User</span> <span class=\"fn\">findUser</span>(<span class=\"type\">Long</span> id) {\n    <span class=\"kw\">return</span> repo.<span class=\"fn\">load</span>(id);\n}\n<span class=\"cm\">// Requires Spring proxying + config</span>",
+      "python": "<span class=\"cm\"># stdlib memoization, zero config</span>\n<span class=\"kw\">from</span> functools <span class=\"kw\">import</span> lru_cache\n\n<span class=\"dec\">@lru_cache</span>(maxsize=<span class=\"num\">128</span>)\n<span class=\"kw\">def</span> <span class=\"fn\">find_user</span>(id: <span class=\"type\">int</span>) -&gt; <span class=\"type\">User</span>:\n    <span class=\"kw\">return</span> repo.<span class=\"fn\">load</span>(id)\n<span class=\"cm\"># Results cached automatically</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Batteries-Included Decorators",
+      "content": "The stdlib ships decorators you'd reach for a framework to get in Java: <code>@functools.lru_cache</code> (memoization), <code>@property</code> (computed getter), <code>@staticmethod</code> / <code>@classmethod</code>, <code>@dataclass</code> (Module 06), <code>@functools.wraps</code> (preserve metadata when writing your own). No DI container, no proxying."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Getter/setter pair for a computed value</span>\n<span class=\"kw\">public</span> <span class=\"type\">double</span> <span class=\"fn\">getCelsius</span>() {\n    <span class=\"kw\">return</span> (fahrenheit - <span class=\"num\">32</span>) * <span class=\"num\">5</span> / <span class=\"num\">9</span>;\n}\n<span class=\"kw\">public void</span> <span class=\"fn\">setCelsius</span>(<span class=\"type\">double</span> c) {\n    <span class=\"kw\">this</span>.fahrenheit = c * <span class=\"num\">9</span> / <span class=\"num\">5</span> + <span class=\"num\">32</span>;\n}",
+      "python": "<span class=\"cm\"># @property — attribute access, method logic</span>\n<span class=\"dec\">@property</span>\n<span class=\"kw\">def</span> <span class=\"fn\">celsius</span>(<span class=\"self\">self</span>) -&gt; <span class=\"type\">float</span>:\n    <span class=\"kw\">return</span> (<span class=\"self\">self</span>.fahrenheit - <span class=\"num\">32</span>) * <span class=\"num\">5</span> / <span class=\"num\">9</span>\n\n<span class=\"dec\">@celsius.setter</span>\n<span class=\"kw\">def</span> <span class=\"fn\">celsius</span>(<span class=\"self\">self</span>, c: <span class=\"type\">float</span>):\n    <span class=\"self\">self</span>.fahrenheit = c * <span class=\"num\">9</span> / <span class=\"num\">5</span> + <span class=\"num\">32</span>\n<span class=\"cm\"># Used as: temp.celsius = 25  (no parens!)</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "@property: Public Fields With Hidden Logic",
+      "content": "Because <code>@property</code> exposes method logic behind plain attribute syntax (<code>temp.celsius</code>, not <code>temp.getCelsius()</code>), Python code starts with public attributes and adds validation/computation <em>later</em> without breaking callers. This is why Python skips getters/setters up front — you can always promote a field to a property with zero call-site changes."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Writing Your Own? Use functools.wraps",
+      "content": "A naive decorator replaces your function with the wrapper, clobbering its <code>__name__</code>, docstring, and signature — breaking introspection and other tooling. Always apply <code>@functools.wraps(func)</code> to the inner wrapper so the metadata is copied through. It's the small ceremony that keeps stack traces and <code>help()</code> meaningful."
+    },
+    {
+      "type": "tab-group",
+      "tabs": [
+        {
+          "label": "Define a decorator",
+          "content": "<div class=\"prose\"><pre><span class=\"kw\">import</span> functools\n\n<span class=\"kw\">def</span> <span class=\"fn\">log_calls</span>(func):\n    <span class=\"dec\">@functools.wraps</span>(func)\n    <span class=\"kw\">def</span> <span class=\"fn\">wrapper</span>(*args, **kwargs):\n        <span class=\"fn\">print</span>(<span class=\"str\">f\"→ {func.__name__}{args}\"</span>)\n        result = <span class=\"fn\">func</span>(*args, **kwargs)\n        <span class=\"fn\">print</span>(<span class=\"str\">f\"← {result}\"</span>)\n        <span class=\"kw\">return</span> result\n    <span class=\"kw\">return</span> wrapper</pre></div>"
+        },
+        {
+          "label": "Apply it",
+          "content": "<div class=\"prose\"><pre><span class=\"dec\">@log_calls</span>\n<span class=\"kw\">def</span> <span class=\"fn\">add</span>(a: <span class=\"type\">int</span>, b: <span class=\"type\">int</span>) -&gt; <span class=\"type\">int</span>:\n    <span class=\"kw\">return</span> a + b\n\n<span class=\"fn\">add</span>(<span class=\"num\">2</span>, <span class=\"num\">3</span>)\n<span class=\"cm\"># → add(2, 3)</span>\n<span class=\"cm\"># ← 5</span></pre><p>Equivalent to <code>add = log_calls(add)</code> — the decorator just sugars that reassignment.</p></div>"
+        }
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "How does a Python decorator fundamentally differ from a Java annotation?",
+      "options": [
+        "Decorators can only be applied to classes",
+        "A decorator is a function that actively wraps/replaces the target; an annotation is passive metadata a framework must read reflectively",
+        "There is no difference — they're the same feature",
+        "Annotations run code but decorators don't"
+      ],
+      "correct": 1,
+      "explanation": "A Java annotation is inert metadata — nothing happens unless a framework uses reflection to find and act on it. A Python decorator is a higher-order function that receives the decorated object and returns a replacement, so <code>@log_calls</code> immediately rewires behavior with no container or reflection involved."
+    }
+  ]
+}

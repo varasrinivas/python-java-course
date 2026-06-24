@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{COURSE_TITLE}}</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── ROOT TOKENS ── */
+:root {
+  --bg: #0f1117;
+  --surface: #181b25;
+  --surface2: #1e2230;
+  --border: #2a2e3d;
+  --text: #e2e4ea;
+  --text-dim: #8b8fa3;
+  --java: #f89820;
+  --java-bg: rgba(248,152,32,0.08);
+  --java-border: rgba(248,152,32,0.25);
+  --python: #4584b6;
+  --python-bg: rgba(69,132,182,0.08);
+  --python-border: rgba(69,132,182,0.25);
+  --accent: #a78bfa;
+  --accent-bg: rgba(167,139,250,0.08);
+  --green: #34d399;
+  --red: #f87171;
+  --yellow: #fbbf24;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(15,17,23,0.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; height: 56px;
+}
+.topbar-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600; font-size: 15px;
+  display: flex; align-items: center; gap: 10px;
+}
+.topbar-title .java-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--java); }
+.topbar-title .arrow { color: var(--text-dim); font-size: 13px; }
+.topbar-title .python-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--python); }
+.progress-track {
+  position: absolute; bottom: 0; left: 0; height: 2px;
+  background: var(--border); width: 100%;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--java), var(--python));
+  transition: width 0.4s ease; width: 0%;
+}
+.nav-controls { display: flex; gap: 8px; align-items: center; }
+.nav-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); border-radius: 8px; padding: 6px 14px;
+  font-size: 13px; cursor: pointer; font-family: 'Inter', sans-serif;
+  transition: all 0.2s;
+}
+.nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.mod-counter { font-size: 12px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  position: fixed; left: 0; top: 56px; bottom: 0; width: 280px;
+  background: var(--surface); border-right: 1px solid var(--border);
+  overflow-y: auto; z-index: 90; transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+.sidebar.open { transform: translateX(0); }
+.sidebar-toggle {
+  position: fixed; left: 12px; top: 68px; z-index: 95;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text); width: 32px; height: 32px; border-radius: 8px;
+  cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.sidebar-toggle:hover { border-color: var(--accent); }
+.sidebar-section {
+  padding: 16px 0 8px 16px;
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--text-dim); font-weight: 600;
+}
+.sidebar-item {
+  padding: 10px 16px; cursor: pointer;
+  font-size: 13px; color: var(--text-dim);
+  border-left: 2px solid transparent;
+  transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+}
+.sidebar-item:hover { color: var(--text); background: var(--surface2); }
+.sidebar-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-bg); }
+.sidebar-item.completed .si-dot { background: var(--green); }
+.si-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); flex-shrink: 0; }
+
+/* ── MAIN ── */
+.main { margin-top: 56px; padding: 40px 24px 80px; max-width: 900px; margin-left: auto; margin-right: auto; }
+
+/* ── MODULE ── */
+.module { display: none; animation: fadeIn 0.4s ease; }
+.module.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+.mod-header { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.mod-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.mod-title { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; line-height: 1.3; margin-bottom: 8px; }
+.mod-subtitle { color: var(--text-dim); font-size: 15px; }
+
+/* ── CONCEPT MAP ── */
+.concept-map {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 24px; margin: 24px 0; position: relative; overflow: hidden;
+}
+.concept-map::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--java), var(--python)); }
+.cm-title { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--accent); }
+
+/* ── COMPARISON ── */
+.comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin: 20px 0; border-radius: 10px; overflow: hidden; }
+@media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+.comp-side { padding: 20px; position: relative; }
+.comp-side.java { background: var(--java-bg); border: 1px solid var(--java-border); border-radius: 10px 0 0 10px; }
+.comp-side.python { background: var(--python-bg); border: 1px solid var(--python-border); border-radius: 0 10px 10px 0; }
+@media (max-width: 640px) {
+  .comp-side.java { border-radius: 10px 10px 0 0; }
+  .comp-side.python { border-radius: 0 0 10px 10px; }
+}
+.comp-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.comp-label.java-label { color: var(--java); }
+.comp-label.python-label { color: var(--python); }
+
+pre { font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.8; white-space: pre-wrap; word-break: break-word; }
+pre .kw { color: #c792ea; }
+pre .type { color: #82aaff; }
+pre .str { color: #c3e88d; }
+pre .num { color: #f78c6c; }
+pre .cm { color: #546e7a; font-style: italic; }
+pre .fn { color: #82aaff; }
+pre .op { color: #89ddff; }
+pre .dec { color: #ffd700; }
+pre .bi { color: #e06c75; }
+pre .self { color: #f07178; }
+
+/* ── INSIGHT ── */
+.insight { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 16px 20px; margin: 20px 0; font-size: 14px; }
+.insight-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; color: var(--accent); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.insight.gotcha { border-left-color: var(--yellow); }
+.insight.gotcha .insight-title { color: var(--yellow); }
+.insight.win { border-left-color: var(--green); }
+.insight.win .insight-title { color: var(--green); }
+
+/* ── DIAGRAM ── */
+.diagram-container { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; }
+.diagram-container svg { max-width: 100%; height: auto; }
+
+/* ── TABS ── */
+.tab-group { margin: 20px 0; }
+.tab-headers { display: flex; gap: 0; border-bottom: 1px solid var(--border); }
+.tab-btn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--text-dim); padding: 10px 18px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; transition: all 0.2s; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-panel { display: none; padding: 20px 0; }
+.tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+/* ── ANIMATION STAGE ── */
+.anim-stage { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 24px 0; min-height: 200px; position: relative; }
+.anim-controls { display: flex; gap: 8px; margin-top: 16px; }
+.anim-btn { background: var(--accent-bg); border: 1px solid rgba(167,139,250,0.3); color: var(--accent); border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer; font-family: 'JetBrains Mono', monospace; transition: all 0.2s; }
+.anim-btn:hover { background: rgba(167,139,250,0.15); }
+
+/* ── PROSE ── */
+.prose { margin: 16px 0; font-size: 15px; }
+.prose p { margin-bottom: 12px; }
+.prose code { font-family: 'JetBrains Mono', monospace; background: var(--surface2); padding: 2px 7px; border-radius: 4px; font-size: 13px; color: var(--accent); }
+
+/* ── TABLE ── */
+.ref-table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px; }
+.ref-table th { text-align: left; padding: 10px 14px; background: var(--surface2); color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); }
+.ref-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+.ref-table tr:hover { background: var(--surface); }
+
+/* ── QUIZ ── */
+.quiz-block { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 24px 0; }
+.quiz-q { font-weight: 600; margin-bottom: 14px; font-size: 15px; }
+.quiz-opt { display: block; width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 12px 16px; margin-bottom: 8px; cursor: pointer; text-align: left; font-family: 'Inter', sans-serif; font-size: 14px; transition: all 0.2s; }
+.quiz-opt:hover { border-color: var(--accent); }
+.quiz-opt.correct { border-color: var(--green); background: rgba(52,211,153,0.1); }
+.quiz-opt.wrong { border-color: var(--red); background: rgba(248,113,113,0.1); }
+.quiz-feedback { margin-top: 12px; font-size: 13px; display: none; }
+
+/* ── FOOTER NAV ── */
+.footer-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); }
+.footer-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 10px; padding: 12px 24px; font-size: 14px; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+.footer-btn:hover { border-color: var(--accent); color: var(--accent); }
+.footer-btn.primary { background: var(--accent); color: #0f1117; border-color: var(--accent); font-weight: 600; }
+.footer-btn.primary:hover { background: #8b6ff0; }
+.footer-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-title">
+    <span class="java-dot"></span> Java
+    <span class="arrow">→</span>
+    <span class="python-dot"></span> Python
+  </div>
+  <div class="nav-controls">
+    <span class="mod-counter" id="modCounter">1 / 1</span>
+    <button class="nav-btn" id="prevBtn" disabled>← Prev</button>
+    <button class="nav-btn" id="nextBtn">Next →</button>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<!-- SIDEBAR TOGGLE -->
+<button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sidebar"></div>
+
+<!-- MAIN CONTENT -->
+<div class="main" id="mainContent"></div>
+
+<script>
+// ── MODULE DATA (injected by build script) ──
+const MODS = {{MODULES_JSON}};
+
+// ── SIDEBAR GROUPS (injected by build script) ──
+const SIDEBAR_GROUPS = {{SIDEBAR_GROUPS_JSON}};
+
+// ── RENDERING ENGINE ──
+let currentMod = 0;
+const completed = new Set();
+
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  let html = '';
+  const modIdToIndex = {};
+  MODS.forEach((m, i) => modIdToIndex[m.id] = i);
+
+  for (const [groupName, modIds] of Object.entries(SIDEBAR_GROUPS)) {
+    html += `<div class="sidebar-section">${groupName}</div>`;
+    modIds.forEach(modId => {
+      const i = modIdToIndex[modId];
+      if (i === undefined) return;
+      const mod = MODS[i];
+      const label = mod.eyebrow ? mod.eyebrow + ': ' : '';
+      const title = mod.title.length > 28 ? mod.title.slice(0,28)+'…' : mod.title;
+      html += `<div class="sidebar-item ${i===currentMod?'active':''} ${completed.has(i)?'completed':''}" onclick="goTo(${i})">
+        <span class="si-dot"></span>${label}${title}
+      </div>`;
+    });
+  }
+  sb.innerHTML = html;
+}
+
+function renderSection(sec, modIdx, secIdx) {
+  switch(sec.type) {
+    case 'comparison':
+      return `<div class="comparison">
+        <div class="comp-side java">
+          <div class="comp-label java-label">☕ Java</div>
+          <pre>${sec.java}</pre>
+        </div>
+        <div class="comp-side python">
+          <div class="comp-label python-label">🐍 Python</div>
+          <pre>${sec.python}</pre>
+        </div>
+      </div>`;
+
+    case 'insight':
+      const vIcon = sec.variant === 'gotcha' ? '⚠️ ' : sec.variant === 'win' ? '✨ ' : '';
+      return `<div class="insight ${sec.variant||''}">
+        <div class="insight-title">${vIcon}${sec.title}</div>
+        <div>${sec.content}</div>
+      </div>`;
+
+    case 'concept-map':
+      return `<div class="concept-map">
+        <div class="cm-title">🗺️ ${sec.title}</div>
+        ${sec.content}
+      </div>`;
+
+    case 'table':
+      return `<table class="ref-table"><thead><tr>${sec.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>
+        ${sec.rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
+      </tbody></table>`;
+
+    case 'prose':
+      return `<div class="prose">${sec.content}</div>`;
+
+    case 'quiz':
+      const qid = `quiz_${modIdx}_${secIdx}`;
+      return `<div class="quiz-block" id="${qid}">
+        <div class="quiz-q">🧪 ${sec.question}</div>
+        ${sec.options.map((o,oi) => `<button class="quiz-opt" onclick="checkQuiz('${qid}',${oi},${sec.correct})">${o}</button>`).join('')}
+        <div class="quiz-feedback" id="${qid}_fb">${sec.explanation}</div>
+      </div>`;
+
+    case 'diagram':
+      return `<div class="diagram-container">
+        ${sec.title ? `<div class="cm-title">📐 ${sec.title}</div>` : ''}
+        ${sec.svg || ''}
+      </div>`;
+
+    case 'animation':
+      return `<div class="anim-stage">
+        ${sec.title ? `<div class="cm-title">🎬 ${sec.title}</div>` : ''}
+        ${sec.html || ''}
+      </div>`;
+
+    case 'tab-group':
+      const tgid = `tabs_${modIdx}_${secIdx}`;
+      return `<div class="tab-group">
+        ${sec.title ? `<div class="cm-title">🧩 ${sec.title}</div>` : ''}
+        <div class="tab-headers">
+          ${sec.tabs.map((t,ti) => `<button class="tab-btn ${ti===0?'active':''}" onclick="switchTab('${tgid}',${ti})">${t.label}</button>`).join('')}
+        </div>
+        ${sec.tabs.map((t,ti) => `<div class="tab-panel ${ti===0?'active':''}" id="${tgid}_${ti}">${t.content}</div>`).join('')}
+      </div>`;
+
+    default:
+      return `<div class="prose"><p><em>Unknown section type: ${sec.type}</em></p></div>`;
+  }
+}
+
+function renderModule(idx) {
+  const mod = MODS[idx];
+  let html = `<div class="module active">
+    <div class="mod-header">
+      <div class="mod-eyebrow">${mod.eyebrow || ''}</div>
+      <div class="mod-title">${mod.title}</div>
+      <div class="mod-subtitle">${mod.subtitle || ''}</div>
+    </div>`;
+
+  mod.sections.forEach((sec, si) => { html += renderSection(sec, idx, si); });
+
+  html += `<div class="footer-nav">
+    <button class="footer-btn" onclick="prev()" ${idx===0?'disabled':''}>← Previous</button>
+    <button class="footer-btn primary" onclick="next()">${idx===MODS.length-1?'🎉 Complete':'Next Module →'}</button>
+  </div></div>`;
+
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function checkQuiz(qid, selected, correct) {
+  const block = document.getElementById(qid);
+  const opts = block.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i) => {
+    o.disabled = true;
+    if (i === correct) o.classList.add('correct');
+    else if (i === selected && selected !== correct) o.classList.add('wrong');
+  });
+  const fb = document.getElementById(qid+'_fb');
+  fb.style.display = 'block';
+  fb.style.color = selected === correct ? 'var(--green)' : 'var(--red)';
+}
+
+function switchTab(tgid, idx) {
+  const group = document.querySelectorAll(`[id^="${tgid}_"]`);
+  const btns = group[0]?.closest('.tab-group')?.querySelectorAll('.tab-btn') || [];
+  group.forEach((p,i) => p.classList.toggle('active', i === idx));
+  btns.forEach((b,i) => b.classList.toggle('active', i === idx));
+}
+
+function updateUI() {
+  document.getElementById('modCounter').textContent = `${currentMod+1} / ${MODS.length}`;
+  document.getElementById('prevBtn').disabled = currentMod === 0;
+  document.getElementById('progressFill').style.width = `${((currentMod+1)/MODS.length)*100}%`;
+  renderSidebar();
+  renderModule(currentMod);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function goTo(i) {
+  if (currentMod !== i) completed.add(currentMod);
+  currentMod = i;
+  updateUI();
+  document.getElementById('sidebar').classList.remove('open');
+}
+function next() { if (currentMod < MODS.length-1) goTo(currentMod+1); }
+function prev() { if (currentMod > 0) goTo(currentMod-1); }
+
+document.getElementById('prevBtn').addEventListener('click', prev);
+document.getElementById('nextBtn').addEventListener('click', next);
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next();
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
+});
+
+updateUI();
+</script>
+</body>
+</html>

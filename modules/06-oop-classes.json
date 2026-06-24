@@ -1,0 +1,82 @@
+{
+  "id": "06-oop-classes",
+  "title": "OOP & Classes",
+  "eyebrow": "Module 06",
+  "subtitle": "Same principles, explicit self, and multiple inheritance",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Fields, constructor, getters, equals...</span>\n<span class=\"kw\">public class</span> <span class=\"type\">User</span> {\n    <span class=\"kw\">private final</span> <span class=\"type\">String</span> name;\n    <span class=\"kw\">private</span> <span class=\"type\">int</span> age;\n\n    <span class=\"kw\">public</span> <span class=\"fn\">User</span>(<span class=\"type\">String</span> name, <span class=\"type\">int</span> age) {\n        <span class=\"kw\">this</span>.name = name;\n        <span class=\"kw\">this</span>.age = age;\n    }\n    <span class=\"kw\">public</span> <span class=\"type\">String</span> <span class=\"fn\">getName</span>() { <span class=\"kw\">return</span> name; }\n}",
+      "python": "<span class=\"cm\"># self is explicit, __init__ is the constructor</span>\n<span class=\"kw\">class</span> <span class=\"type\">User</span>:\n    <span class=\"kw\">def</span> <span class=\"fn\">__init__</span>(<span class=\"self\">self</span>, name: <span class=\"type\">str</span>, age: <span class=\"type\">int</span>):\n        <span class=\"self\">self</span>.name = name\n        <span class=\"self\">self</span>.age = age\n\n    <span class=\"cm\"># No getters needed — attributes are public</span>\n    <span class=\"kw\">def</span> <span class=\"fn\">greet</span>(<span class=\"self\">self</span>) -&gt; <span class=\"type\">str</span>:\n        <span class=\"kw\">return</span> <span class=\"str\">f\"Hi, {<span class=\"self\">self</span>.name}\"</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "self Is Explicit — and You'll Forget It",
+      "content": "Every instance method takes <code>self</code> as its first parameter (Java's implicit <code>this</code>). You write it in the definition but <em>not</em> at the call site: <code>user.greet()</code>. Forgetting <code>self</code> in a method definition is the most common beginner error. Access fields as <code>self.name</code> — bare <code>name</code> won't find the attribute."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// A whole data class, by hand or via record</span>\n<span class=\"kw\">public record</span> <span class=\"type\">Point</span>(<span class=\"type\">int</span> x, <span class=\"type\">int</span> y) {}\n<span class=\"cm\">// record gives constructor, equals,</span>\n<span class=\"cm\">// hashCode, toString for free</span>",
+      "python": "<span class=\"cm\"># @dataclass is Python's record</span>\n<span class=\"kw\">from</span> dataclasses <span class=\"kw\">import</span> dataclass\n\n<span class=\"dec\">@dataclass</span>\n<span class=\"kw\">class</span> <span class=\"type\">Point</span>:\n    x: <span class=\"type\">int</span>\n    y: <span class=\"type\">int</span>\n<span class=\"cm\"># __init__, __eq__, __repr__ generated</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "@dataclass = Java record, but Mutable by Default",
+      "content": "<code>@dataclass</code> generates <code>__init__</code>, <code>__eq__</code>, and <code>__repr__</code> from your annotated fields — like a Java <code>record</code>. Unlike a record it's mutable unless you pass <code>@dataclass(frozen=True)</code>. Add defaults, methods, and <code>field(default_factory=list)</code> for safe mutable defaults."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Single inheritance + interfaces</span>\n<span class=\"kw\">public class</span> <span class=\"type\">Admin</span> <span class=\"kw\">extends</span> <span class=\"type\">User</span>\n        <span class=\"kw\">implements</span> <span class=\"type\">Auditable</span> {\n    <span class=\"kw\">public</span> <span class=\"fn\">Admin</span>(<span class=\"type\">String</span> n, <span class=\"type\">int</span> a) {\n        <span class=\"kw\">super</span>(n, a);\n    }\n    <span class=\"dec\">@Override</span>\n    <span class=\"kw\">public</span> <span class=\"type\">String</span> <span class=\"fn\">greet</span>() { <span class=\"kw\">return</span> <span class=\"str\">\"Admin \"</span> + <span class=\"fn\">getName</span>(); }\n}",
+      "python": "<span class=\"cm\"># Inheritance in parentheses, super() too</span>\n<span class=\"kw\">class</span> <span class=\"type\">Admin</span>(<span class=\"type\">User</span>):\n    <span class=\"kw\">def</span> <span class=\"fn\">__init__</span>(<span class=\"self\">self</span>, name: <span class=\"type\">str</span>, age: <span class=\"type\">int</span>):\n        <span class=\"bi\">super</span>().<span class=\"fn\">__init__</span>(name, age)\n\n    <span class=\"cm\"># No @Override keyword — just redefine</span>\n    <span class=\"kw\">def</span> <span class=\"fn\">greet</span>(<span class=\"self\">self</span>) -&gt; <span class=\"type\">str</span>:\n        <span class=\"kw\">return</span> <span class=\"str\">f\"Admin {<span class=\"self\">self</span>.name}\"</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Encapsulation Is by Convention",
+      "content": "Python has no <code>private</code> keyword. The convention: a single underscore <code>_internal</code> means \"don't touch\" (protected-ish), and a double underscore <code>__secret</code> triggers name-mangling to avoid subclass collisions. Nothing is truly hidden — Python trusts the developer. Use <code>@property</code> when you need getter/setter logic."
+    },
+    {
+      "type": "diagram",
+      "id": "dunder-diagram",
+      "title": "Dunder Methods = Operator Hooks",
+      "svg": "<svg viewBox=\"0 0 700 210\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" style=\"max-width:640px;\"><text x=\"350\" y=\"24\" text-anchor=\"middle\" fill=\"#a78bfa\" font-family=\"Space Grotesk\" font-size=\"13\" font-weight=\"600\">You write the hook, Python wires the syntax</text><rect x=\"40\" y=\"50\" width=\"180\" height=\"40\" rx=\"8\" fill=\"rgba(167,139,250,0.1)\" stroke=\"rgba(167,139,250,0.4)\"/><text x=\"130\" y=\"75\" text-anchor=\"middle\" fill=\"#a78bfa\" font-family=\"JetBrains Mono\" font-size=\"12\">__init__</text><rect x=\"40\" y=\"100\" width=\"180\" height=\"40\" rx=\"8\" fill=\"rgba(167,139,250,0.1)\" stroke=\"rgba(167,139,250,0.4)\"/><text x=\"130\" y=\"125\" text-anchor=\"middle\" fill=\"#a78bfa\" font-family=\"JetBrains Mono\" font-size=\"12\">__eq__</text><rect x=\"40\" y=\"150\" width=\"180\" height=\"40\" rx=\"8\" fill=\"rgba(167,139,250,0.1)\" stroke=\"rgba(167,139,250,0.4)\"/><text x=\"130\" y=\"175\" text-anchor=\"middle\" fill=\"#a78bfa\" font-family=\"JetBrains Mono\" font-size=\"12\">__len__</text><line x1=\"220\" y1=\"70\" x2=\"440\" y2=\"70\" stroke=\"#2a2e3d\" stroke-width=\"1.5\" stroke-dasharray=\"6 3\"/><polygon points=\"435,66 445,70 435,74\" fill=\"#8b8fa3\"/><line x1=\"220\" y1=\"120\" x2=\"440\" y2=\"120\" stroke=\"#2a2e3d\" stroke-width=\"1.5\" stroke-dasharray=\"6 3\"/><polygon points=\"435,116 445,120 435,124\" fill=\"#8b8fa3\"/><line x1=\"220\" y1=\"170\" x2=\"440\" y2=\"170\" stroke=\"#2a2e3d\" stroke-width=\"1.5\" stroke-dasharray=\"6 3\"/><polygon points=\"435,166 445,170 435,174\" fill=\"#8b8fa3\"/><rect x=\"450\" y=\"50\" width=\"210\" height=\"40\" rx=\"8\" fill=\"rgba(52,211,153,0.1)\" stroke=\"rgba(52,211,153,0.4)\"/><text x=\"555\" y=\"75\" text-anchor=\"middle\" fill=\"#34d399\" font-family=\"JetBrains Mono\" font-size=\"12\">User(\"Ada\", 36)</text><rect x=\"450\" y=\"100\" width=\"210\" height=\"40\" rx=\"8\" fill=\"rgba(52,211,153,0.1)\" stroke=\"rgba(52,211,153,0.4)\"/><text x=\"555\" y=\"125\" text-anchor=\"middle\" fill=\"#34d399\" font-family=\"JetBrains Mono\" font-size=\"12\">a == b</text><rect x=\"450\" y=\"150\" width=\"210\" height=\"40\" rx=\"8\" fill=\"rgba(52,211,153,0.1)\" stroke=\"rgba(52,211,153,0.4)\"/><text x=\"555\" y=\"175\" text-anchor=\"middle\" fill=\"#34d399\" font-family=\"JetBrains Mono\" font-size=\"12\">len(obj)</text></svg>"
+    },
+    {
+      "type": "tab-group",
+      "title": "Duck Typing & Structural Typing",
+      "tabs": [
+        { "label": "Duck typing", "content": "<div class=\"prose\"><pre><span class=\"cm\"># No interface needed — if it has .read(), it works</span>\n<span class=\"kw\">def</span> <span class=\"fn\">load</span>(source) -&gt; <span class=\"type\">str</span>:\n    <span class=\"kw\">return</span> source.<span class=\"fn\">read</span>()   <span class=\"cm\"># any object with read()</span>\n\n<span class=\"fn\">load</span>(<span class=\"bi\">open</span>(<span class=\"str\">\"f.txt\"</span>))         <span class=\"cm\"># a file</span>\n<span class=\"fn\">load</span>(io.<span class=\"type\">StringIO</span>(<span class=\"str\">\"data\"</span>))   <span class=\"cm\"># an in-memory buffer</span></pre><p>In Java you'd declare a <code>Readable</code> interface and every type would <code>implements</code> it. Python only asks: does the object <em>have</em> the method? \"If it walks like a duck...\"</p></div>" },
+        { "label": "Protocol (static)", "content": "<div class=\"prose\"><pre><span class=\"kw\">from</span> typing <span class=\"kw\">import</span> <span class=\"type\">Protocol</span>\n\n<span class=\"kw\">class</span> <span class=\"type\">Readable</span>(<span class=\"type\">Protocol</span>):\n    <span class=\"kw\">def</span> <span class=\"fn\">read</span>(<span class=\"self\">self</span>) -&gt; <span class=\"type\">str</span>: ...\n\n<span class=\"kw\">def</span> <span class=\"fn\">load</span>(source: <span class=\"type\">Readable</span>) -&gt; <span class=\"type\">str</span>:\n    <span class=\"kw\">return</span> source.<span class=\"fn\">read</span>()</pre><p><code>Protocol</code> gives <strong>static, structural typing</strong>: mypy checks the shape, but classes never declare <code>implements Readable</code> — they just match it. Java interfaces, inverted.</p></div>" },
+        { "label": "Objects all the way", "content": "<div class=\"prose\"><pre><span class=\"cm\"># Classes, functions, modules are all objects</span>\nhandlers = {<span class=\"str\">\"json\"</span>: parse_json, <span class=\"str\">\"csv\"</span>: parse_csv}\nparser = handlers[fmt]          <span class=\"cm\"># a function in a dict</span>\n\n<span class=\"cm\"># Monkey-patching: rebind attributes at runtime</span>\n<span class=\"kw\">import</span> service\nservice.now = <span class=\"kw\">lambda</span>: fixed_time   <span class=\"cm\"># e.g. swap in a test</span></pre><p>There's no <code>static</code>/<code>final</code> wall. Functions, classes, and modules are first-class objects you can pass around, store, and replace — powerful, and occasionally dangerous.</p></div>" }
+      ]
+    },
+    {
+      "type": "table",
+      "headers": ["Java", "Python", "Purpose"],
+      "rows": [
+        ["constructor", "<code>__init__</code>", "Initialize instance"],
+        ["<code>toString()</code>", "<code>__repr__</code> / <code>__str__</code>", "String form"],
+        ["<code>equals()</code>", "<code>__eq__</code>", "Value equality"],
+        ["<code>hashCode()</code>", "<code>__hash__</code>", "Hash for sets/dicts"],
+        ["<code>compareTo()</code>", "<code>__lt__</code> etc.", "Ordering"],
+        ["<code>record</code>", "<code>@dataclass</code>", "Boilerplate-free data"],
+        ["<code>this</code>", "<code>self</code> (explicit)", "Instance reference"],
+        ["interface", "<code>abc.ABC</code> / Protocol", "Contracts"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "Which statement about `self` in Python is correct?",
+      "options": [
+        "self is a reserved keyword like Java's this",
+        "self is passed automatically, so you omit it in method definitions",
+        "self must be the first parameter of instance methods but is omitted at the call site",
+        "self is only needed inside __init__"
+      ],
+      "correct": 2,
+      "explanation": "<code>self</code> is an ordinary parameter (not a keyword) that, by convention, is the first parameter of every instance method. Python passes the instance to it automatically when you call <code>obj.method()</code>, so you write <code>self</code> in the <em>definition</em> but never at the call site. It's required in <em>every</em> instance method, not just <code>__init__</code>."
+    }
+  ]
+}

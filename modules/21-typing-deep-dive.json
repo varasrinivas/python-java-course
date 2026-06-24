@@ -1,0 +1,55 @@
+{
+  "id": "21-typing-deep-dive",
+  "title": "Typing Deep Dive",
+  "eyebrow": "Module 21",
+  "subtitle": "Generics, TypeVar, and mypy — static checks, opt-in",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Generic method with a bounded type</span>\n<span class=\"kw\">public</span> &lt;<span class=\"type\">T</span>&gt; <span class=\"type\">T</span> <span class=\"fn\">first</span>(<span class=\"type\">List</span>&lt;<span class=\"type\">T</span>&gt; xs) {\n    <span class=\"kw\">return</span> xs.<span class=\"fn\">get</span>(<span class=\"num\">0</span>);\n}\n<span class=\"type\">List</span>&lt;<span class=\"type\">String</span>&gt; names = ...;\n<span class=\"type\">String</span> s = <span class=\"fn\">first</span>(names);",
+      "python": "<span class=\"cm\"># TypeVar = the &lt;T&gt; type parameter</span>\n<span class=\"kw\">from</span> typing <span class=\"kw\">import</span> <span class=\"type\">TypeVar</span>\n\nT = <span class=\"type\">TypeVar</span>(<span class=\"str\">\"T\"</span>)\n<span class=\"kw\">def</span> <span class=\"fn\">first</span>(xs: <span class=\"type\">list</span>[<span class=\"type\">T</span>]) -&gt; <span class=\"type\">T</span>:\n    <span class=\"kw\">return</span> xs[<span class=\"num\">0</span>]\n\ns = <span class=\"fn\">first</span>([<span class=\"str\">\"a\"</span>, <span class=\"str\">\"b\"</span>])   <span class=\"cm\"># inferred as str</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Hints Are Erased Too — Checked by mypy, Not the Interpreter",
+      "content": "Like Java generics (erased at runtime), Python type hints are <strong>ignored by the interpreter</strong> — they don't enforce anything when your code runs. A separate static checker (<code>mypy</code> or <code>pyright</code>) reads them and flags mismatches before you ship. Run <code>mypy --strict src/</code> in CI to get compile-time-style safety. <code>reveal_type(x)</code> makes mypy print the inferred type during a check."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Optional, function types, wildcards</span>\n<span class=\"type\">Optional</span>&lt;<span class=\"type\">User</span>&gt; <span class=\"fn\">find</span>(<span class=\"type\">Long</span> id);\n<span class=\"type\">Function</span>&lt;<span class=\"type\">Integer</span>, <span class=\"type\">String</span>&gt; fmt;\n<span class=\"type\">Map</span>&lt;<span class=\"type\">String</span>, <span class=\"type\">Object</span>&gt; raw;\n<span class=\"type\">List</span>&lt;? <span class=\"kw\">extends</span> <span class=\"type\">Number</span>&gt; nums;",
+      "python": "<span class=\"cm\"># Modern syntax: | unions, builtin generics</span>\n<span class=\"kw\">from</span> typing <span class=\"kw\">import</span> <span class=\"type\">Callable</span>, <span class=\"type\">Any</span>\n\n<span class=\"kw\">def</span> <span class=\"fn\">find</span>(id: <span class=\"type\">int</span>) -&gt; <span class=\"type\">User</span> | <span class=\"kw\">None</span>: ...     <span class=\"cm\"># Optional</span>\nfmt: <span class=\"type\">Callable</span>[[<span class=\"type\">int</span>], <span class=\"type\">str</span>]                  <span class=\"cm\"># Function</span>\nraw: <span class=\"type\">dict</span>[<span class=\"type\">str</span>, <span class=\"type\">Any</span>]                        <span class=\"cm\"># Map&lt;String,Object&gt;</span>\nnums: <span class=\"type\">list</span>[<span class=\"type\">float</span>]"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Gradual Typing: Add Hints Where They Pay Off",
+      "content": "You don't have to type everything. Python's <strong>gradual typing</strong> lets you annotate public APIs and tricky logic while leaving glue code untyped — <code>Any</code> opts out locally. Start with hints on function signatures (the highest-value spot), turn on <code>mypy</code>, and tighten over time. Pair with <code>Protocol</code> (Module 06) for structural interfaces and <code>TypedDict</code> for dict-shaped JSON payloads."
+    },
+    {
+      "type": "table",
+      "headers": ["Java", "Python typing", "Note"],
+      "rows": [
+        ["<code>&lt;T&gt;</code>", "<code>TypeVar(\"T\")</code>", "Type parameter"],
+        ["<code>Optional&lt;T&gt;</code>", "<code>T | None</code>", "Nullable"],
+        ["<code>Function&lt;A,B&gt;</code>", "<code>Callable[[A], B]</code>", "Function type"],
+        ["<code>Object</code>", "<code>Any</code> / <code>object</code>", "<code>Any</code> opts out of checks"],
+        ["<code>? extends T</code>", "bound <code>TypeVar</code>", "Bounds/variance"],
+        ["interface", "<code>Protocol</code>", "Structural typing"],
+        ["compiler", "<code>mypy</code> / <code>pyright</code>", "External checker"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "When are Python type hints actually enforced?",
+      "options": [
+        "At runtime, on every function call",
+        "Never by the interpreter — a static checker like mypy verifies them ahead of time",
+        "Only inside classes",
+        "When you pass --strict to python"
+      ],
+      "correct": 1,
+      "explanation": "The CPython interpreter ignores annotations at runtime (just as the JVM erases generics). Their value comes from <strong>static analysis</strong> — <code>mypy</code>/<code>pyright</code> in your editor and CI catch type mismatches before execution. They're checked documentation, not runtime guards (libraries like pydantic add runtime validation separately)."
+    }
+  ]
+}

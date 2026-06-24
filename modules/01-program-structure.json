@@ -1,0 +1,59 @@
+{
+  "id": "01-program-structure",
+  "title": "Program Structure & Entry Points",
+  "eyebrow": "Module 01",
+  "subtitle": "From public static void main to a clean script",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// HelloWorld.java</span>\n<span class=\"kw\">public class</span> <span class=\"type\">HelloWorld</span> {\n    <span class=\"kw\">public static void</span> <span class=\"fn\">main</span>(<span class=\"type\">String</span>[] args) {\n        <span class=\"type\">System</span>.out.<span class=\"fn\">println</span>(<span class=\"str\">\"Hello, World!\"</span>);\n    }\n}",
+      "python": "<span class=\"cm\"># hello.py</span>\n<span class=\"fn\">print</span>(<span class=\"str\">\"Hello, World!\"</span>)\n\n\n<span class=\"cm\"># That's it. No class wrapper needed.</span>\n<span class=\"cm\"># No main method. No semicolons.</span>\n<span class=\"cm\"># No compilation step.</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Java Instinct to Override",
+      "content": "Your muscle memory will want to write <code>public class</code> wrappers. Resist it — Python files ARE modules. A file <code>utils.py</code> is directly importable: <code>import utils</code>."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Java: a function MUST live in a class.</span>\n<span class=\"cm\">// Utility classes exist only to hold statics.</span>\n<span class=\"kw\">public final class</span> <span class=\"type\">TextUtils</span> {\n    <span class=\"kw\">private</span> <span class=\"fn\">TextUtils</span>() {}  <span class=\"cm\">// no instances</span>\n\n    <span class=\"kw\">public static</span> <span class=\"type\">String</span> <span class=\"fn\">slugify</span>(<span class=\"type\">String</span> s) {\n        <span class=\"kw\">return</span> s.<span class=\"fn\">toLowerCase</span>().<span class=\"fn\">replace</span>(<span class=\"str\">' '</span>, <span class=\"str\">'-'</span>);\n    }\n}\n<span class=\"cm\">// Call: TextUtils.slugify(\"Hello World\")</span>",
+      "python": "<span class=\"cm\"># text_utils.py — the module IS the namespace</span>\n<span class=\"kw\">def</span> <span class=\"fn\">slugify</span>(s: <span class=\"type\">str</span>) -&gt; <span class=\"type\">str</span>:\n    <span class=\"kw\">return</span> s.<span class=\"fn\">lower</span>().<span class=\"fn\">replace</span>(<span class=\"str\">\" \"</span>, <span class=\"str\">\"-\"</span>)\n\n<span class=\"kw\">def</span> <span class=\"fn\">word_count</span>(s: <span class=\"type\">str</span>) -&gt; <span class=\"type\">int</span>:\n    <span class=\"kw\">return</span> <span class=\"bi\">len</span>(s.<span class=\"fn\">split</span>())\n\n<span class=\"cm\"># Call: text_utils.slugify(\"Hello World\")</span>\n<span class=\"cm\"># No class. No static. No private constructor.</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "You Can Build a Whole App Without a Single Class",
+      "content": "Java forces every function into a class — which is why the JDK is full of utility classes (<code>Collections</code>, <code>Files</code>, <code>Math</code>) that are just bags of statics. Python's <strong>module is already the namespace</strong>, so top-level functions are the norm, not a code smell. Plenty of production Python apps — CLIs, data pipelines, web handlers — are organized purely as modules and functions. Reach for a <code>class</code> only when you have <em>state and behavior to bundle together</em>; otherwise a function is the right unit. This is the heart of Python's function-first style."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Structured Java app</span>\n<span class=\"kw\">package</span> com.example.app;\n\n<span class=\"kw\">import</span> java.util.List;\n\n<span class=\"kw\">public class</span> <span class=\"type\">App</span> {\n    <span class=\"kw\">private</span> <span class=\"type\">String</span> name;\n\n    <span class=\"kw\">public</span> <span class=\"fn\">App</span>(<span class=\"type\">String</span> name) {\n        <span class=\"kw\">this</span>.name = name;\n    }\n\n    <span class=\"kw\">public static void</span> <span class=\"fn\">main</span>(<span class=\"type\">String</span>[] args) {\n        <span class=\"type\">App</span> app = <span class=\"kw\">new</span> <span class=\"type\">App</span>(<span class=\"str\">\"Demo\"</span>);\n        app.<span class=\"fn\">run</span>();\n    }\n}",
+      "python": "<span class=\"cm\"># app.py</span>\n<span class=\"kw\">from</span> typing <span class=\"kw\">import</span> <span class=\"type\">Optional</span>\n\n<span class=\"kw\">class</span> <span class=\"type\">App</span>:\n    <span class=\"kw\">def</span> <span class=\"fn\">__init__</span>(<span class=\"self\">self</span>, name: <span class=\"type\">str</span>):\n        <span class=\"self\">self</span>.name = name\n\n    <span class=\"kw\">def</span> <span class=\"fn\">run</span>(<span class=\"self\">self</span>):\n        <span class=\"fn\">print</span>(<span class=\"str\">f\"Running {<span class=\"self\">self</span>.name}\"</span>)\n\n<span class=\"kw\">if</span> __name__ == <span class=\"str\">\"__main__\"</span>:\n    app = <span class=\"type\">App</span>(<span class=\"str\">\"Demo\"</span>)\n    app.<span class=\"fn\">run</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "The __name__ Guard",
+      "content": "<code>if __name__ == \"__main__\"</code> is Python's equivalent of <code>main()</code>. It runs only when the file is executed directly, not when imported as a module. This is how Python separates \"library code\" from \"script entry point\"."
+    },
+    {
+      "type": "diagram",
+      "id": "structure-diagram",
+      "title": "File → Module → Package Structure",
+      "svg": "<svg viewBox=\"0 0 700 200\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" style=\"max-width:600px;\"><rect x=\"20\" y=\"60\" width=\"140\" height=\"80\" rx=\"10\" fill=\"rgba(69,132,182,0.15)\" stroke=\"rgba(69,132,182,0.5)\" stroke-width=\"1.5\"/><text x=\"90\" y=\"95\" text-anchor=\"middle\" fill=\"#4584b6\" font-family=\"JetBrains Mono\" font-size=\"12\" font-weight=\"600\">utils.py</text><text x=\"90\" y=\"115\" text-anchor=\"middle\" fill=\"#8b8fa3\" font-family=\"Inter\" font-size=\"10\">= 1 module</text><line x1=\"170\" y1=\"100\" x2=\"230\" y2=\"100\" stroke=\"#2a2e3d\" stroke-width=\"1.5\" stroke-dasharray=\"6 3\"/><polygon points=\"225,96 235,100 225,104\" fill=\"#8b8fa3\"/><rect x=\"240\" y=\"30\" width=\"180\" height=\"140\" rx=\"10\" fill=\"rgba(167,139,250,0.08)\" stroke=\"rgba(167,139,250,0.3)\" stroke-width=\"1.5\"/><text x=\"330\" y=\"55\" text-anchor=\"middle\" fill=\"#a78bfa\" font-family=\"JetBrains Mono\" font-size=\"12\" font-weight=\"600\">myapp/</text><rect x=\"260\" y=\"68\" width=\"140\" height=\"28\" rx=\"6\" fill=\"rgba(69,132,182,0.1)\" stroke=\"rgba(69,132,182,0.3)\"/><text x=\"330\" y=\"87\" text-anchor=\"middle\" fill=\"#4584b6\" font-family=\"JetBrains Mono\" font-size=\"10\">__init__.py</text><rect x=\"260\" y=\"102\" width=\"140\" height=\"28\" rx=\"6\" fill=\"rgba(69,132,182,0.1)\" stroke=\"rgba(69,132,182,0.3)\"/><text x=\"330\" y=\"121\" text-anchor=\"middle\" fill=\"#4584b6\" font-family=\"JetBrains Mono\" font-size=\"10\">service.py</text><rect x=\"260\" y=\"136\" width=\"140\" height=\"28\" rx=\"6\" fill=\"rgba(69,132,182,0.1)\" stroke=\"rgba(69,132,182,0.3)\"/><text x=\"330\" y=\"155\" text-anchor=\"middle\" fill=\"#4584b6\" font-family=\"JetBrains Mono\" font-size=\"10\">models.py</text><line x1=\"430\" y1=\"100\" x2=\"490\" y2=\"100\" stroke=\"#2a2e3d\" stroke-width=\"1.5\" stroke-dasharray=\"6 3\"/><polygon points=\"485,96 495,100 485,104\" fill=\"#8b8fa3\"/><rect x=\"500\" y=\"60\" width=\"180\" height=\"80\" rx=\"10\" fill=\"rgba(52,211,153,0.08)\" stroke=\"rgba(52,211,153,0.3)\" stroke-width=\"1.5\"/><text x=\"590\" y=\"90\" text-anchor=\"middle\" fill=\"#34d399\" font-family=\"JetBrains Mono\" font-size=\"11\" font-weight=\"600\">import myapp</text><text x=\"590\" y=\"110\" text-anchor=\"middle\" fill=\"#34d399\" font-family=\"JetBrains Mono\" font-size=\"11\">from myapp import service</text><text x=\"90\" y=\"170\" text-anchor=\"middle\" fill=\"#8b8fa3\" font-family=\"Inter\" font-size=\"10\">Single File</text><text x=\"330\" y=\"185\" text-anchor=\"middle\" fill=\"#8b8fa3\" font-family=\"Inter\" font-size=\"10\">Directory = Package</text><text x=\"590\" y=\"160\" text-anchor=\"middle\" fill=\"#8b8fa3\" font-family=\"Inter\" font-size=\"10\">Usage</text></svg>"
+    },
+    {
+      "type": "quiz",
+      "question": "In Python, what replaces Java's curly braces {} for code blocks?",
+      "options": [
+        "Parentheses ()",
+        "Square brackets []",
+        "Indentation (whitespace)",
+        "Colons only"
+      ],
+      "correct": 2,
+      "explanation": "Python uses consistent indentation (typically 4 spaces) to define code blocks. The colon <code>:</code> marks the start, then everything indented underneath belongs to that block."
+    }
+  ]
+}

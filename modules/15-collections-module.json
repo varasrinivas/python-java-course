@@ -1,0 +1,54 @@
+{
+  "id": "15-collections-module",
+  "title": "The collections Module",
+  "eyebrow": "Module 15",
+  "subtitle": "defaultdict, Counter, namedtuple, deque",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Group values by key: the get-or-create dance</span>\n<span class=\"type\">Map</span>&lt;<span class=\"type\">String</span>, <span class=\"type\">List</span>&lt;<span class=\"type\">Order</span>&gt;&gt; byCust = <span class=\"kw\">new</span> <span class=\"type\">HashMap</span>&lt;&gt;();\n<span class=\"kw\">for</span> (<span class=\"type\">Order</span> o : orders) {\n    byCust.<span class=\"fn\">computeIfAbsent</span>(o.cust,\n        k -&gt; <span class=\"kw\">new</span> <span class=\"type\">ArrayList</span>&lt;&gt;()).<span class=\"fn\">add</span>(o);\n}",
+      "python": "<span class=\"cm\"># defaultdict supplies the empty list for you</span>\n<span class=\"kw\">from</span> collections <span class=\"kw\">import</span> defaultdict\n\nby_cust: <span class=\"type\">dict</span>[<span class=\"type\">str</span>, <span class=\"type\">list</span>] = <span class=\"fn\">defaultdict</span>(<span class=\"type\">list</span>)\n<span class=\"kw\">for</span> o <span class=\"kw\">in</span> orders:\n    by_cust[o.cust].<span class=\"fn\">append</span>(o)   <span class=\"cm\"># key auto-created</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "defaultdict Kills the get-or-create Pattern",
+      "content": "Pass a factory (<code>list</code>, <code>set</code>, <code>int</code>) and any missing key is initialized on first access — Python's <code>computeIfAbsent</code>, but ambient. <code>defaultdict(int)</code> makes a frequency counter; <code>defaultdict(list)</code> makes a multimap. No null checks, no <code>putIfAbsent</code> ceremony."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Count occurrences with streams</span>\n<span class=\"type\">Map</span>&lt;<span class=\"type\">String</span>, <span class=\"type\">Long</span>&gt; counts = words.<span class=\"fn\">stream</span>()\n    .<span class=\"fn\">collect</span>(<span class=\"type\">Collectors</span>.<span class=\"fn\">groupingBy</span>(\n        w -&gt; w, <span class=\"type\">Collectors</span>.<span class=\"fn\">counting</span>()));\n<span class=\"cm\">// Top-N needs more stream plumbing</span>",
+      "python": "<span class=\"cm\"># Counter does it in one call</span>\n<span class=\"kw\">from</span> collections <span class=\"kw\">import</span> <span class=\"type\">Counter</span>\n\ncounts = <span class=\"type\">Counter</span>(words)\ncounts[<span class=\"str\">\"error\"</span>]        <span class=\"cm\"># 0 if absent, never KeyError</span>\ncounts.<span class=\"fn\">most_common</span>(<span class=\"num\">3</span>)   <span class=\"cm\"># top-3 as (item, n) pairs</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "namedtuple vs @dataclass vs deque",
+      "content": "<code>namedtuple(\"Point\", \"x y\")</code> is a lightweight immutable record with named fields and tuple behavior — handy for quick fixed structures. For anything with methods or defaults, prefer <code>@dataclass</code> (Module 06). And <code>deque</code> is your <code>ArrayDeque</code>: O(1) <code>append</code>/<code>appendleft</code>/<code>popleft</code>, ideal for queues and sliding windows where a <code>list</code>'s <code>pop(0)</code> would be O(n)."
+    },
+    {
+      "type": "table",
+      "headers": ["collections type", "Java analog", "Use for"],
+      "rows": [
+        ["<code>defaultdict</code>", "<code>computeIfAbsent</code>", "Auto-initialized values"],
+        ["<code>Counter</code>", "<code>groupingBy(counting())</code>", "Frequencies, top-N"],
+        ["<code>namedtuple</code>", "lightweight <code>record</code>", "Immutable fixed fields"],
+        ["<code>deque</code>", "<code>ArrayDeque</code>", "Fast both-ends queue"],
+        ["<code>OrderedDict</code>", "<code>LinkedHashMap</code>", "Rarely needed (dict is ordered)"],
+        ["<code>ChainMap</code>", "layered <code>Map</code> lookup", "Merged config scopes"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What does `defaultdict(list)` give you that a plain dict does not?",
+      "options": [
+        "It sorts keys automatically",
+        "Accessing a missing key auto-creates an empty list instead of raising KeyError",
+        "It makes the dict immutable",
+        "It allows duplicate keys"
+      ],
+      "correct": 1,
+      "explanation": "A plain <code>dict</code> raises <code>KeyError</code> on a missing key. <code>defaultdict(list)</code> calls the factory (<code>list</code>) to create and store an empty list on first access — exactly the behavior you'd hand-roll with Java's <code>computeIfAbsent(k, x -&gt; new ArrayList&lt;&gt;())</code>, but automatic."
+    }
+  ]
+}

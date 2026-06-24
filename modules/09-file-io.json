@@ -1,0 +1,67 @@
+{
+  "id": "09-file-io",
+  "title": "File I/O & Paths",
+  "eyebrow": "Module 09",
+  "subtitle": "pathlib is your new java.nio.file.Path",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// java.nio for reading a whole file</span>\n<span class=\"type\">Path</span> path = <span class=\"type\">Path</span>.<span class=\"fn\">of</span>(<span class=\"str\">\"data\"</span>, <span class=\"str\">\"input.txt\"</span>);\n<span class=\"type\">String</span> text = <span class=\"type\">Files</span>.<span class=\"fn\">readString</span>(path);\n<span class=\"type\">List</span>&lt;<span class=\"type\">String</span>&gt; lines = <span class=\"type\">Files</span>.<span class=\"fn\">readAllLines</span>(path);",
+      "python": "<span class=\"cm\"># pathlib — the modern, OO way</span>\n<span class=\"kw\">from</span> pathlib <span class=\"kw\">import</span> <span class=\"type\">Path</span>\n\npath = <span class=\"type\">Path</span>(<span class=\"str\">\"data\"</span>) / <span class=\"str\">\"input.txt\"</span>  <span class=\"cm\"># / joins!</span>\ntext = path.<span class=\"fn\">read_text</span>()\nlines = path.<span class=\"fn\">read_text</span>().<span class=\"fn\">splitlines</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "The / Operator Joins Paths",
+      "content": "<code>pathlib.Path</code> overloads <code>/</code> so <code>Path(\"data\") / \"sub\" / \"file.txt\"</code> builds an OS-correct path — no <code>File.separator</code>, no manual concatenation. It's the direct analog of <code>java.nio.file.Path</code> but more ergonomic. <code>path.parent</code>, <code>path.name</code>, <code>path.suffix</code>, <code>path.exists()</code> all just work."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Buffered streaming, try-with-resources</span>\n<span class=\"kw\">try</span> (<span class=\"type\">BufferedReader</span> r =\n        <span class=\"type\">Files</span>.<span class=\"fn\">newBufferedReader</span>(path)) {\n    <span class=\"type\">String</span> line;\n    <span class=\"kw\">while</span> ((line = r.<span class=\"fn\">readLine</span>()) != <span class=\"kw\">null</span>) {\n        process(line);\n    }\n}",
+      "python": "<span class=\"cm\"># Files are iterable line-by-line, lazily</span>\n<span class=\"kw\">with</span> <span class=\"bi\">open</span>(path, encoding=<span class=\"str\">\"utf-8\"</span>) <span class=\"kw\">as</span> f:\n    <span class=\"kw\">for</span> line <span class=\"kw\">in</span> f:        <span class=\"cm\"># streams, low memory</span>\n        <span class=\"fn\">process</span>(line.<span class=\"fn\">rstrip</span>())\n<span class=\"cm\"># with == try-with-resources (Module 07)</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Always Specify encoding=",
+      "content": "<code>open(path)</code> uses the <em>platform default</em> encoding — which differs between your Mac/Linux CI (UTF-8) and a Windows box (often cp1252). That's a classic \"works on my machine\" bug. Always pass <code>encoding=\"utf-8\"</code> explicitly. Java's <code>readString</code> defaults to UTF-8; Python does not until you ask."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Writing text + create dirs</span>\n<span class=\"type\">Files</span>.<span class=\"fn\">createDirectories</span>(path.<span class=\"fn\">getParent</span>());\n<span class=\"type\">Files</span>.<span class=\"fn\">writeString</span>(path, content,\n    <span class=\"type\">StandardOpenOption</span>.CREATE);",
+      "python": "<span class=\"cm\"># mkdir parents, then write</span>\npath.parent.<span class=\"fn\">mkdir</span>(parents=<span class=\"kw\">True</span>, exist_ok=<span class=\"kw\">True</span>)\npath.<span class=\"fn\">write_text</span>(content, encoding=<span class=\"str\">\"utf-8\"</span>)\n\n<span class=\"cm\"># Or stream writes with a context manager</span>\n<span class=\"kw\">with</span> path.<span class=\"fn\">open</span>(<span class=\"str\">\"w\"</span>, encoding=<span class=\"str\">\"utf-8\"</span>) <span class=\"kw\">as</span> f:\n    f.<span class=\"fn\">write</span>(content)"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Structured Data: json Is Built In",
+      "content": "No Jackson/Gson dependency. <code>import json</code> ships with Python: <code>json.loads(text)</code> parses to dicts/lists, <code>json.dumps(obj, indent=2)</code> serializes. For files, <code>json.load(f)</code> / <code>json.dump(obj, f)</code>. CSV is similar via the stdlib <code>csv</code> module. Both are part of the \"batteries included\" library."
+    },
+    {
+      "type": "table",
+      "headers": ["Task", "Java (nio)", "Python (pathlib)"],
+      "rows": [
+        ["Build path", "<code>Path.of(a, b)</code>", "<code>Path(a) / b</code>"],
+        ["Read all text", "<code>Files.readString(p)</code>", "<code>p.read_text()</code>"],
+        ["Read lines", "<code>Files.readAllLines(p)</code>", "<code>p.read_text().splitlines()</code>"],
+        ["Write text", "<code>Files.writeString(p,s)</code>", "<code>p.write_text(s)</code>"],
+        ["Exists?", "<code>Files.exists(p)</code>", "<code>p.exists()</code>"],
+        ["Make dirs", "<code>Files.createDirectories</code>", "<code>p.mkdir(parents=True)</code>"],
+        ["Glob", "<code>Files.walk / DirectoryStream</code>", "<code>p.glob(\"**/*.py\")</code>"],
+        ["Filename", "<code>p.getFileName()</code>", "<code>p.name</code>"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "Why is `open(path, encoding=\"utf-8\")` preferred over `open(path)`?",
+      "options": [
+        "It's faster",
+        "Bare open() uses the platform default encoding, causing cross-platform bugs",
+        "encoding is a required argument",
+        "It enables binary mode"
+      ],
+      "correct": 1,
+      "explanation": "Without an explicit <code>encoding</code>, Python falls back to the OS default — UTF-8 on most Linux/Mac, but often cp1252 on Windows. That produces mojibake or <code>UnicodeDecodeError</code> that only appears on certain machines. Always specify <code>encoding=\"utf-8\"</code>, unlike Java's <code>Files.readString</code> which already defaults to UTF-8."
+    }
+  ]
+}

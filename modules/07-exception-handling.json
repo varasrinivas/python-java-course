@@ -1,0 +1,77 @@
+{
+  "id": "07-exception-handling",
+  "title": "Exception Handling",
+  "eyebrow": "Module 07",
+  "subtitle": "try-except — no checked exceptions, no throws clause",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Checked exceptions force try or throws</span>\n<span class=\"kw\">try</span> {\n    <span class=\"type\">String</span> data = <span class=\"type\">Files</span>.<span class=\"fn\">readString</span>(path);\n} <span class=\"kw\">catch</span> (<span class=\"type\">IOException</span> e) {\n    log.<span class=\"fn\">error</span>(<span class=\"str\">\"read failed\"</span>, e);\n} <span class=\"kw\">finally</span> {\n    cleanup();\n}",
+      "python": "<span class=\"cm\"># except instead of catch</span>\n<span class=\"kw\">try</span>:\n    data = path.<span class=\"fn\">read_text</span>()\n<span class=\"kw\">except</span> <span class=\"type\">OSError</span> <span class=\"kw\">as</span> e:\n    log.<span class=\"fn\">error</span>(<span class=\"str\">\"read failed: %s\"</span>, e)\n<span class=\"kw\">finally</span>:\n    <span class=\"fn\">cleanup</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "No Checked Exceptions — No throws Clause",
+      "content": "Every Python exception is unchecked (like Java's <code>RuntimeException</code>). There is <strong>no <code>throws</code> declaration</strong> and the compiler never forces you to catch anything. This removes a huge amount of boilerplate — but the discipline shifts to you: document what your function can raise, because the signature won't."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Multi-catch</span>\n<span class=\"kw\">try</span> {\n    risky();\n} <span class=\"kw\">catch</span> (<span class=\"type\">IOException</span> | <span class=\"type\">SQLException</span> e) {\n    handle(e);\n} <span class=\"kw\">catch</span> (<span class=\"type\">Exception</span> e) {\n    fallback(e);\n}",
+      "python": "<span class=\"cm\"># Tuple of types in one except</span>\n<span class=\"kw\">try</span>:\n    <span class=\"fn\">risky</span>()\n<span class=\"kw\">except</span> (<span class=\"type\">OSError</span>, <span class=\"type\">ValueError</span>) <span class=\"kw\">as</span> e:\n    <span class=\"fn\">handle</span>(e)\n<span class=\"kw\">except</span> <span class=\"type\">Exception</span> <span class=\"kw\">as</span> e:\n    <span class=\"fn\">fallback</span>(e)\n<span class=\"kw\">else</span>:\n    <span class=\"fn\">on_success</span>()   <span class=\"cm\"># ran if no exception</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "try Has an else Clause Too",
+      "content": "Python's <code>try</code> can take an <code>else</code> block that runs only if <strong>no exception was raised</strong> — a clean place for the \"happy path follow-up\" that shouldn't itself be inside the protected <code>try</code>. Order is: <code>try → except → else → finally</code>. There's no Java equivalent."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Custom exception + raise</span>\n<span class=\"kw\">class</span> <span class=\"type\">PaymentError</span> <span class=\"kw\">extends</span> <span class=\"type\">RuntimeException</span> {\n    <span class=\"kw\">public</span> <span class=\"fn\">PaymentError</span>(<span class=\"type\">String</span> msg) { <span class=\"kw\">super</span>(msg); }\n}\n<span class=\"kw\">throw new</span> <span class=\"type\">PaymentError</span>(<span class=\"str\">\"declined\"</span>);",
+      "python": "<span class=\"cm\"># Subclass Exception, raise it</span>\n<span class=\"kw\">class</span> <span class=\"type\">PaymentError</span>(<span class=\"type\">Exception</span>):\n    <span class=\"kw\">pass</span>\n\n<span class=\"kw\">raise</span> <span class=\"type\">PaymentError</span>(<span class=\"str\">\"declined\"</span>)\n<span class=\"cm\"># Re-raise with context:</span>\n<span class=\"kw\">raise</span> <span class=\"type\">PaymentError</span>(<span class=\"str\">\"declined\"</span>) <span class=\"kw\">from</span> err"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Never Write a Bare except:",
+      "content": "<code>except:</code> with no type catches <em>everything</em> — including <code>KeyboardInterrupt</code> and <code>SystemExit</code>, which you almost never want to swallow. Always catch a specific type, or <code>except Exception:</code> at the broadest. And don't catch-and-pass silently; at minimum log it. The <code>raise ... from err</code> form preserves the cause chain like Java's <code>initCause</code>."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// try-with-resources auto-closes</span>\n<span class=\"kw\">try</span> (<span class=\"type\">BufferedReader</span> r = <span class=\"type\">Files</span>.<span class=\"fn\">newBufferedReader</span>(p)) {\n    <span class=\"kw\">return</span> r.<span class=\"fn\">readLine</span>();\n}\n<span class=\"cm\">// r.close() called automatically</span>",
+      "python": "<span class=\"cm\"># with statement = try-with-resources</span>\n<span class=\"kw\">with</span> <span class=\"bi\">open</span>(path) <span class=\"kw\">as</span> f:\n    <span class=\"kw\">return</span> f.<span class=\"fn\">readline</span>()\n<span class=\"cm\"># f.close() called automatically,</span>\n<span class=\"cm\"># even if an exception is raised</span>"
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// LBYL: Look Before You Leap</span>\n<span class=\"kw\">if</span> (map.<span class=\"fn\">containsKey</span>(key)) {\n    <span class=\"type\">Value</span> v = map.<span class=\"fn\">get</span>(key);\n    <span class=\"fn\">use</span>(v);\n} <span class=\"kw\">else</span> {\n    <span class=\"fn\">handleMissing</span>();\n}",
+      "python": "<span class=\"cm\"># EAFP: Easier to Ask Forgiveness than Permission</span>\n<span class=\"kw\">try</span>:\n    <span class=\"fn\">use</span>(data[key])\n<span class=\"kw\">except</span> <span class=\"type\">KeyError</span>:\n    <span class=\"fn\">handle_missing</span>()\n<span class=\"cm\"># Idiomatic Python: attempt first, handle failure —</span>\n<span class=\"cm\"># and avoid check-then-act race conditions.</span>"
+    },
+    {
+      "type": "table",
+      "headers": ["Java", "Python", "Notes"],
+      "rows": [
+        ["<code>catch</code>", "<code>except</code>", "Keyword change"],
+        ["<code>throw</code>", "<code>raise</code>", "Keyword change"],
+        ["<code>throws X</code>", "— (none)", "No checked exceptions"],
+        ["<code>finally</code>", "<code>finally</code>", "Identical"],
+        ["multi-catch <code>A | B</code>", "<code>except (A, B)</code>", "Tuple of types"],
+        ["try-with-resources", "<code>with ... as</code>", "Context managers"],
+        ["<code>RuntimeException</code>", "<code>Exception</code>", "Base for custom"],
+        ["<code>NullPointerException</code>", "<code>AttributeError</code>", "On <code>None</code> access"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What's the Python equivalent of Java's try-with-resources for guaranteed cleanup?",
+      "options": [
+        "A finally block is the only option",
+        "The `with` statement and context managers (__enter__/__exit__)",
+        "The `using` keyword",
+        "Manual try/except around close()"
+      ],
+      "correct": 1,
+      "explanation": "The <code>with</code> statement is Python's try-with-resources. Any object implementing the context manager protocol (<code>__enter__</code>/<code>__exit__</code>) — like a file from <code>open()</code> — is cleaned up automatically when the block exits, even on exception. It's cleaner than a manual <code>finally</code>."
+    }
+  ]
+}

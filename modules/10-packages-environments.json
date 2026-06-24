@@ -1,0 +1,78 @@
+{
+  "id": "10-packages-environments",
+  "title": "Packages, Modules & Environments",
+  "eyebrow": "Module 10",
+  "subtitle": "pip + venv = your Maven/Gradle equivalent",
+  "sections": [
+    {
+      "type": "concept-map",
+      "title": "Your Maven Mental Model, Translated",
+      "content": "<div style=\"display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; text-align:center;\"><div style=\"background:var(--java-bg); border:1px solid var(--java-border); border-radius:10px; padding:16px;\"><div style=\"color:var(--java); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px; margin-bottom:6px;\">pom.xml</div><div style=\"font-size:11px; color:var(--text-dim);\">declares deps</div><div style=\"color:var(--python); font-size:18px; margin:8px 0;\">↓</div><div style=\"color:var(--python); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px;\">pyproject.toml</div></div><div style=\"background:var(--java-bg); border:1px solid var(--java-border); border-radius:10px; padding:16px;\"><div style=\"color:var(--java); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px; margin-bottom:6px;\">mvn install</div><div style=\"font-size:11px; color:var(--text-dim);\">fetches jars</div><div style=\"color:var(--python); font-size:18px; margin:8px 0;\">↓</div><div style=\"color:var(--python); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px;\">pip install</div></div><div style=\"background:var(--java-bg); border:1px solid var(--java-border); border-radius:10px; padding:16px;\"><div style=\"color:var(--java); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px; margin-bottom:6px;\">~/.m2 repo</div><div style=\"font-size:11px; color:var(--text-dim);\">global cache</div><div style=\"color:var(--python); font-size:18px; margin:8px 0;\">↓</div><div style=\"color:var(--python); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:13px;\">.venv/ (per project)</div></div></div>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Dependencies Are Per-Project, Not Global — Use a venv",
+      "content": "Maven isolates dependencies per project automatically. Python's <code>pip</code> installs <strong>globally</strong> by default, so two projects fighting over <code>requests==2.x</code> vs <code>2.y</code> corrupt each other. The fix is a <strong>virtual environment</strong> — an isolated per-project Python with its own packages. Always create one before <code>pip install</code>."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\"># Maven lifecycle</span>\nmvn clean install\nmvn dependency:tree\n<span class=\"cm\"># Deps declared in pom.xml,</span>\n<span class=\"cm\"># cached in ~/.m2, scoped to project</span>\n<span class=\"cm\"># by the build tool automatically.</span>",
+      "python": "<span class=\"cm\"># Create + activate an isolated env</span>\npython -m venv .venv\n<span class=\"cm\"># macOS/Linux:</span>\nsource .venv/bin/activate\n<span class=\"cm\"># Windows PowerShell:</span>\n.venv\\Scripts\\Activate.ps1\n\npip install requests\npip freeze &gt; requirements.txt"
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Importing by fully-qualified package</span>\n<span class=\"kw\">import</span> com.example.service.UserService;\n<span class=\"kw\">import</span> java.util.List;\n<span class=\"kw\">import static</span> java.lang.Math.max;\n\n<span class=\"type\">UserService</span> svc = <span class=\"kw\">new</span> <span class=\"type\">UserService</span>();",
+      "python": "<span class=\"cm\"># Several import styles</span>\n<span class=\"kw\">import</span> json                 <span class=\"cm\"># whole module</span>\n<span class=\"kw\">from</span> pathlib <span class=\"kw\">import</span> <span class=\"type\">Path</span>     <span class=\"cm\"># one name</span>\n<span class=\"kw\">from</span> math <span class=\"kw\">import</span> sqrt <span class=\"kw\">as</span> root  <span class=\"cm\"># alias</span>\n<span class=\"kw\">import</span> numpy <span class=\"kw\">as</span> np         <span class=\"cm\"># common alias</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "",
+      "title": "Modern Tooling: uv and pyproject.toml",
+      "content": "The ecosystem is consolidating on <code>pyproject.toml</code> (the <code>pom.xml</code> analog) for declaring dependencies and project metadata. Tools like <strong><code>uv</code></strong> and <strong><code>poetry</code></strong> manage the venv, lockfile, and installs in one command — much closer to the Maven/Gradle experience. <code>uv</code> in particular is dramatically faster than plain <code>pip</code> and worth adopting for new projects."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "import Runs the Module's Top-Level Code",
+      "content": "Unlike Java where <code>import</code> is a compile-time reference, a Python <code>import</code> <strong>executes the module top to bottom</strong> the first time it's loaded. Any code at module level (not inside a function/class) runs as a side effect. This is exactly why the <code>if __name__ == \"__main__\"</code> guard from Module 01 matters — it keeps script code from firing on import."
+    },
+    {
+      "type": "table",
+      "headers": ["Concept", "Java", "Python"],
+      "rows": [
+        ["Dependency file", "<code>pom.xml</code>", "<code>pyproject.toml</code>"],
+        ["Install deps", "<code>mvn install</code>", "<code>pip install -r ...</code>"],
+        ["Lock versions", "<code>&lt;version&gt;</code> pins", "<code>requirements.txt</code> / lockfile"],
+        ["Isolation", "per-project (auto)", "<code>venv</code> (explicit)"],
+        ["Registry", "Maven Central", "PyPI"],
+        ["Module = ", "<code>.class</code> in package", "<code>.py</code> file"],
+        ["Package = ", "directory + namespace", "directory + <code>__init__.py</code>"],
+        ["Build/run", "<code>mvn / gradle</code>", "<code>uv / poetry / pip</code>"]
+      ]
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Always fully-qualified; package = folder</span>\n<span class=\"kw\">package</span> com.example.app;\n\n<span class=\"kw\">import</span> com.example.services.UserService;\n<span class=\"kw\">import</span> com.example.models.User;\n<span class=\"cm\">// No relative imports — every path is absolute</span>",
+      "python": "<span class=\"cm\"># Absolute (preferred) — from the package root</span>\n<span class=\"kw\">from</span> myapp.services <span class=\"kw\">import</span> <span class=\"type\">UserService</span>\n<span class=\"kw\">from</span> myapp.models <span class=\"kw\">import</span> <span class=\"type\">User</span>\n\n<span class=\"cm\"># Relative — dots mean current / parent package</span>\n<span class=\"kw\">from</span> . <span class=\"kw\">import</span> models       <span class=\"cm\"># same package</span>\n<span class=\"kw\">from</span> ..utils <span class=\"kw\">import</span> retry   <span class=\"cm\"># parent package</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Circular Imports Bite Harder Than in Java",
+      "content": "Because <code>import</code> <strong>executes</strong> a module top-to-bottom, two modules that import each other at the top level can catch one half-initialized — raising <code>ImportError</code> or exposing <code>None</code> attributes. Java resolves circular references lazily and rarely complains. Fixes: import inside the function that needs it, or extract the shared piece into a third module. Tip: use a package's <code>__init__.py</code> to re-export (<code>from .services import UserService</code>) so callers write a clean <code>from myapp import UserService</code> instead of deep paths."
+    },
+    {
+      "type": "quiz",
+      "question": "Why should you create a virtual environment (venv) before pip installing packages?",
+      "options": [
+        "pip refuses to run without one",
+        "pip installs globally by default, so projects can clash over conflicting versions; a venv isolates each project",
+        "venvs make imports faster",
+        "It's required to use type hints"
+      ],
+      "correct": 1,
+      "explanation": "Maven scopes dependencies per project automatically, but <code>pip</code> installs into a shared global location by default. Two projects needing different versions of the same library will conflict. A <code>venv</code> gives each project its own isolated interpreter and package set — the per-project isolation Maven gave you for free."
+    }
+  ]
+}

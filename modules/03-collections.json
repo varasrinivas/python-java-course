@@ -1,0 +1,76 @@
+{
+  "id": "03-collections",
+  "title": "Collections & Data Structures",
+  "eyebrow": "Module 03",
+  "subtitle": "Built-in batteries: list, dict, set, tuple",
+  "sections": [
+    {
+      "type": "concept-map",
+      "title": "Your java.util Map, Drastically Simplified",
+      "content": "<div style=\"display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:10px; text-align:center;\"><div style=\"background:var(--python-bg); border:1px solid var(--python-border); border-radius:10px; padding:14px;\"><div style=\"color:var(--python); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px;\">list</div><div style=\"font-size:11px; color:var(--text-dim); margin-top:6px;\">ArrayList<br>ordered, mutable</div></div><div style=\"background:var(--python-bg); border:1px solid var(--python-border); border-radius:10px; padding:14px;\"><div style=\"color:var(--python); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px;\">dict</div><div style=\"font-size:11px; color:var(--text-dim); margin-top:6px;\">HashMap<br>insertion-ordered</div></div><div style=\"background:var(--python-bg); border:1px solid var(--python-border); border-radius:10px; padding:14px;\"><div style=\"color:var(--python); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px;\">set</div><div style=\"font-size:11px; color:var(--text-dim); margin-top:6px;\">HashSet<br>unique, unordered</div></div><div style=\"background:var(--python-bg); border:1px solid var(--python-border); border-radius:10px; padding:14px;\"><div style=\"color:var(--python); font-family:'JetBrains Mono',monospace; font-weight:600; font-size:15px;\">tuple</div><div style=\"font-size:11px; color:var(--text-dim); margin-top:6px;\">List.of(...)<br>immutable, fixed</div></div></div>"
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Generics + factory methods</span>\n<span class=\"type\">List</span>&lt;<span class=\"type\">String</span>&gt; names = <span class=\"kw\">new</span> <span class=\"type\">ArrayList</span>&lt;&gt;();\nnames.<span class=\"fn\">add</span>(<span class=\"str\">\"Ada\"</span>);\nnames.<span class=\"fn\">add</span>(<span class=\"str\">\"Linus\"</span>);\n<span class=\"type\">String</span> first = names.<span class=\"fn\">get</span>(<span class=\"num\">0</span>);\n<span class=\"type\">int</span> n = names.<span class=\"fn\">size</span>();",
+      "python": "<span class=\"cm\"># Literal syntax, no generics needed</span>\nnames: <span class=\"type\">list</span>[<span class=\"type\">str</span>] = [<span class=\"str\">\"Ada\"</span>, <span class=\"str\">\"Linus\"</span>]\nnames.<span class=\"fn\">append</span>(<span class=\"str\">\"Grace\"</span>)\nfirst = names[<span class=\"num\">0</span>]\nlast = names[-<span class=\"num\">1</span>]   <span class=\"cm\"># negative indexing!</span>\nn = <span class=\"bi\">len</span>(names)    <span class=\"cm\"># len() not .size()</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Slicing Beats Loops",
+      "content": "Python's slice syntax <code>seq[start:stop:step]</code> replaces dozens of <code>subList</code> / loop patterns. <code>names[1:3]</code> is a sublist, <code>names[::-1]</code> reverses, <code>names[::2]</code> takes every other. Slices work on lists, strings, and tuples uniformly — there's no equivalent one-liner in Java."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// HashMap with explicit generics</span>\n<span class=\"type\">Map</span>&lt;<span class=\"type\">String</span>, <span class=\"type\">Integer</span>&gt; ages = <span class=\"kw\">new</span> <span class=\"type\">HashMap</span>&lt;&gt;();\nages.<span class=\"fn\">put</span>(<span class=\"str\">\"Ada\"</span>, <span class=\"num\">36</span>);\n<span class=\"type\">Integer</span> a = ages.<span class=\"fn\">get</span>(<span class=\"str\">\"Ada\"</span>);\n<span class=\"type\">int</span> safe = ages.<span class=\"fn\">getOrDefault</span>(<span class=\"str\">\"Bob\"</span>, <span class=\"num\">0</span>);\n<span class=\"kw\">if</span> (ages.<span class=\"fn\">containsKey</span>(<span class=\"str\">\"Ada\"</span>)) { }",
+      "python": "<span class=\"cm\"># dict literal with {}</span>\nages: <span class=\"type\">dict</span>[<span class=\"type\">str</span>, <span class=\"type\">int</span>] = {<span class=\"str\">\"Ada\"</span>: <span class=\"num\">36</span>}\nages[<span class=\"str\">\"Linus\"</span>] = <span class=\"num\">54</span>\na = ages[<span class=\"str\">\"Ada\"</span>]          <span class=\"cm\"># KeyError if absent</span>\nsafe = ages.<span class=\"fn\">get</span>(<span class=\"str\">\"Bob\"</span>, <span class=\"num\">0</span>)  <span class=\"cm\"># default</span>\n<span class=\"kw\">if</span> <span class=\"str\">\"Ada\"</span> <span class=\"kw\">in</span> ages:       <span class=\"cm\"># in operator</span>\n    ..."
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "dict[key] Throws — Use .get() Like getOrDefault",
+      "content": "<code>ages[\"missing\"]</code> raises <code>KeyError</code>, it does <strong>not</strong> return null the way <code>map.get()</code> does in Java. The Java <code>getOrDefault</code> equivalent is <code>ages.get(\"missing\", default)</code>. And membership is tested with the <code>in</code> operator, not <code>.containsKey()</code>."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Immutable view / unmodifiable</span>\n<span class=\"type\">List</span>&lt;<span class=\"type\">Integer</span>&gt; point = <span class=\"type\">List</span>.<span class=\"fn\">of</span>(<span class=\"num\">3</span>, <span class=\"num\">4</span>);\n<span class=\"cm\">// no real tuple — must make a class or array</span>\n<span class=\"type\">int</span>[] coords = {<span class=\"num\">3</span>, <span class=\"num\">4</span>};",
+      "python": "<span class=\"cm\"># tuple = immutable, fixed-size record</span>\npoint = (<span class=\"num\">3</span>, <span class=\"num\">4</span>)\nx, y = point          <span class=\"cm\"># unpacking!</span>\n<span class=\"cm\"># Great for returning multiple values</span>\n<span class=\"kw\">def</span> <span class=\"fn\">size</span>() -&gt; <span class=\"type\">tuple</span>[<span class=\"type\">int</span>, <span class=\"type\">int</span>]:\n    <span class=\"kw\">return</span> <span class=\"num\">1920</span>, <span class=\"num\">1080</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "Tuple Unpacking & Multiple Returns",
+      "content": "Tuples let a function return several values cleanly: <code>w, h = size()</code>. No need for an out-param, a wrapper class, or a <code>Pair</code>. Swap two variables with <code>a, b = b, a</code> — no temp. This idiom shows up constantly in Python."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Aliasing: both refer to same list</span>\n<span class=\"type\">List</span>&lt;<span class=\"type\">Integer</span>&gt; a = <span class=\"kw\">new</span> <span class=\"type\">ArrayList</span>&lt;&gt;(<span class=\"type\">List</span>.<span class=\"fn\">of</span>(<span class=\"num\">1</span>,<span class=\"num\">2</span>));\n<span class=\"type\">List</span>&lt;<span class=\"type\">Integer</span>&gt; b = a;\nb.<span class=\"fn\">add</span>(<span class=\"num\">3</span>);\n<span class=\"cm\">// a is now [1, 2, 3] too — same object</span>",
+      "python": "<span class=\"cm\"># Same trap — assignment never copies</span>\na = [<span class=\"num\">1</span>, <span class=\"num\">2</span>]\nb = a                 <span class=\"cm\"># alias, NOT a copy</span>\nb.<span class=\"fn\">append</span>(<span class=\"num\">3</span>)\n<span class=\"cm\"># a is now [1, 2, 3] too</span>\nc = a.<span class=\"fn\">copy</span>()          <span class=\"cm\"># shallow copy when you</span>\nd = a[:]              <span class=\"cm\"># actually want one</span>"
+    },
+    {
+      "type": "table",
+      "headers": ["Operation", "Java", "Python"],
+      "rows": [
+        ["Size", "<code>list.size()</code>", "<code>len(list)</code>"],
+        ["Add", "<code>list.add(x)</code>", "<code>list.append(x)</code>"],
+        ["Contains", "<code>list.contains(x)</code>", "<code>x in list</code>"],
+        ["Sort", "<code>Collections.sort(l)</code>", "<code>l.sort()</code> / <code>sorted(l)</code>"],
+        ["Map get-default", "<code>map.getOrDefault(k,d)</code>", "<code>d.get(k, d)</code>"],
+        ["Empty check", "<code>list.isEmpty()</code>", "<code>if not list:</code>"],
+        ["Last element", "<code>list.get(size-1)</code>", "<code>list[-1]</code>"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "After `a = [1, 2]; b = a; b.append(3)`, what is `a`?",
+      "options": [
+        "[1, 2] — b is an independent copy",
+        "[1, 2, 3] — b is another name for the same list",
+        "[3, 1, 2] — append prepends",
+        "Raises an error — lists are immutable"
+      ],
+      "correct": 1,
+      "explanation": "Just like assigning one Java <code>List</code> reference to another, <code>b = a</code> makes both names point at the <em>same</em> list object — it never copies. Mutating through <code>b</code> is visible through <code>a</code>. To get an independent list use <code>a.copy()</code> or <code>a[:]</code>."
+    }
+  ]
+}

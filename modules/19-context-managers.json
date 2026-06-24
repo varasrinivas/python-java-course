@@ -1,0 +1,54 @@
+{
+  "id": "19-context-managers",
+  "title": "Context Managers",
+  "eyebrow": "Module 19",
+  "subtitle": "Author your own try-with-resources",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Implement AutoCloseable for try-with-resources</span>\n<span class=\"kw\">class</span> <span class=\"type\">Span</span> <span class=\"kw\">implements</span> <span class=\"type\">AutoCloseable</span> {\n    <span class=\"kw\">private final</span> <span class=\"type\">long</span> start = <span class=\"type\">System</span>.<span class=\"fn\">nanoTime</span>();\n    <span class=\"dec\">@Override</span> <span class=\"kw\">public void</span> <span class=\"fn\">close</span>() {\n        <span class=\"type\">System</span>.out.<span class=\"fn\">println</span>(<span class=\"type\">System</span>.<span class=\"fn\">nanoTime</span>() - start);\n    }\n}\n<span class=\"kw\">try</span> (<span class=\"type\">Span</span> s = <span class=\"kw\">new</span> <span class=\"type\">Span</span>()) { doWork(); }",
+      "python": "<span class=\"cm\"># Implement __enter__ / __exit__</span>\n<span class=\"kw\">class</span> <span class=\"type\">Span</span>:\n    <span class=\"kw\">def</span> <span class=\"fn\">__enter__</span>(<span class=\"self\">self</span>):\n        <span class=\"self\">self</span>.start = time.<span class=\"fn\">perf_counter</span>()\n        <span class=\"kw\">return</span> <span class=\"self\">self</span>          <span class=\"cm\"># bound to 'as' target</span>\n    <span class=\"kw\">def</span> <span class=\"fn\">__exit__</span>(<span class=\"self\">self</span>, exc_type, exc, tb):\n        <span class=\"fn\">print</span>(time.<span class=\"fn\">perf_counter</span>() - <span class=\"self\">self</span>.start)\n        <span class=\"kw\">return</span> <span class=\"kw\">False</span>        <span class=\"cm\"># False = don't swallow errors</span>\n<span class=\"kw\">with</span> <span class=\"type\">Span</span>(): <span class=\"fn\">do_work</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "__exit__ Receives the Exception — and Can Suppress It",
+      "content": "<code>__exit__(self, exc_type, exc, tb)</code> always runs, like a <code>finally</code> — but it also <em>sees</em> any exception that escaped the block. Return <strong><code>False</code></strong> (or <code>None</code>) to let it propagate; return <strong><code>True</code></strong> to swallow it. Java's <code>close()</code> can't do that. Forgetting and accidentally returning <code>True</code> silently hides bugs, so be deliberate."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// No lightweight option — a full class</span>\n<span class=\"cm\">// even for a tiny timer.</span>\n<span class=\"kw\">class</span> <span class=\"type\">Timer</span> <span class=\"kw\">implements</span> <span class=\"type\">AutoCloseable</span> {\n    <span class=\"kw\">final</span> <span class=\"type\">String</span> label;\n    <span class=\"kw\">final</span> <span class=\"type\">long</span> start = <span class=\"type\">System</span>.<span class=\"fn\">nanoTime</span>();\n    <span class=\"type\">Timer</span>(<span class=\"type\">String</span> label) { <span class=\"kw\">this</span>.label = label; }\n    <span class=\"dec\">@Override</span> <span class=\"kw\">public void</span> <span class=\"fn\">close</span>() {\n        <span class=\"type\">System</span>.out.<span class=\"fn\">println</span>(label + <span class=\"str\">\": \"</span> +\n            (<span class=\"type\">System</span>.<span class=\"fn\">nanoTime</span>() - start));\n    }\n}\n<span class=\"kw\">try</span> (<span class=\"kw\">var</span> t = <span class=\"kw\">new</span> <span class=\"type\">Timer</span>(<span class=\"str\">\"load\"</span>)) { doWork(); }",
+      "python": "<span class=\"cm\"># @contextmanager: one generator, no class</span>\n<span class=\"kw\">from</span> contextlib <span class=\"kw\">import</span> contextmanager\n\n<span class=\"dec\">@contextmanager</span>\n<span class=\"kw\">def</span> <span class=\"fn\">timer</span>(label: <span class=\"type\">str</span>):\n    start = time.<span class=\"fn\">perf_counter</span>()\n    <span class=\"kw\">try</span>:\n        <span class=\"kw\">yield</span>                  <span class=\"cm\"># &lt;-- the 'with' body runs here</span>\n    <span class=\"kw\">finally</span>:\n        <span class=\"fn\">print</span>(<span class=\"str\">f\"{label}: {time.perf_counter()-start:.3f}s\"</span>)\n\n<span class=\"kw\">with</span> <span class=\"fn\">timer</span>(<span class=\"str\">\"load\"</span>):\n    <span class=\"fn\">do_work</span>()"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "@contextmanager Turns a Generator Into a Resource",
+      "content": "Everything before <code>yield</code> is setup, everything after (ideally in a <code>finally</code>) is teardown, and the <code>yield</code>ed value becomes the <code>as</code> target. It's the fastest way to write a context manager — no class, no dunder methods. The stdlib also ships ready-made ones: <code>contextlib.suppress(FileNotFoundError)</code> (cleanly ignore an exception), <code>closing(obj)</code> (call <code>.close()</code>), and <code>ExitStack</code> (manage a dynamic number of <code>with</code>-resources)."
+    },
+    {
+      "type": "table",
+      "headers": ["Java", "Python", "Note"],
+      "rows": [
+        ["<code>AutoCloseable</code>", "<code>__enter__</code>/<code>__exit__</code>", "The protocol"],
+        ["<code>try (r = ...)</code>", "<code>with ... as r:</code>", "Usage"],
+        ["<code>close()</code>", "<code>__exit__(...)</code>", "Cleanup, sees exception"],
+        ["— (no equivalent)", "<code>@contextmanager</code>", "Generator-based CM"],
+        ["catch + ignore", "<code>contextlib.suppress</code>", "Swallow chosen errors"],
+        ["multiple resources", "<code>ExitStack</code>", "Dynamic / nested CMs"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "In a context manager's __exit__, what does returning True do?",
+      "options": [
+        "Signals success to the caller",
+        "Suppresses (swallows) any exception raised inside the with block",
+        "Re-runs the with block",
+        "Nothing — the return value is ignored"
+      ],
+      "correct": 1,
+      "explanation": "<code>__exit__</code> receives the active exception (if any) and its return value decides its fate: <strong>truthy</strong> suppresses it, <strong>falsy</strong> (<code>False</code>/<code>None</code>) lets it propagate. Java's <code>AutoCloseable.close()</code> has no such power — it can't decide whether the original exception survives."
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "id": "13-strings-formatting",
+  "title": "Strings & Formatting",
+  "eyebrow": "Module 13",
+  "subtitle": "f-strings retire String.format and StringBuilder",
+  "sections": [
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Concatenation, String.format, StringBuilder</span>\n<span class=\"type\">String</span> name = <span class=\"str\">\"Ada\"</span>;\n<span class=\"type\">int</span> count = <span class=\"num\">3</span>;\n<span class=\"type\">String</span> a = <span class=\"str\">\"Hi \"</span> + name + <span class=\"str\">\", x\"</span> + count;\n<span class=\"type\">String</span> b = <span class=\"type\">String</span>.<span class=\"fn\">format</span>(\n    <span class=\"str\">\"Hi %s, x%d\"</span>, name, count);",
+      "python": "<span class=\"cm\"># f-strings: expression interpolation inline</span>\nname = <span class=\"str\">\"Ada\"</span>\ncount = <span class=\"num\">3</span>\na = <span class=\"str\">f\"Hi {name}, x{count}\"</span>\n<span class=\"cm\"># Any expression works inside the braces:</span>\nb = <span class=\"str\">f\"Hi {name.upper()}, x{count * 2}\"</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "win",
+      "title": "f-strings Do It All",
+      "content": "Prefix a string with <code>f</code> and any <code>{expression}</code> inside is evaluated and inserted — variables, method calls, arithmetic. It replaces concatenation, <code>String.format</code>, and <code>MessageFormat</code> in one readable syntax. Bonus: <code>f\"{count=}\"</code> prints <code>count=3</code> (name and value) — a debugging gift with no Java equivalent."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Common String operations</span>\ns.<span class=\"fn\">trim</span>();\ns.<span class=\"fn\">toUpperCase</span>();\ns.<span class=\"fn\">split</span>(<span class=\"str\">\",\"</span>);\n<span class=\"type\">String</span>.<span class=\"fn\">join</span>(<span class=\"str\">\", \"</span>, list);\ns.<span class=\"fn\">startsWith</span>(<span class=\"str\">\"http\"</span>);\ns.<span class=\"fn\">contains</span>(<span class=\"str\">\"://\"</span>);",
+      "python": "<span class=\"cm\"># Same ideas, snake_case names</span>\ns.<span class=\"fn\">strip</span>()\ns.<span class=\"fn\">upper</span>()\ns.<span class=\"fn\">split</span>(<span class=\"str\">\",\"</span>)\n<span class=\"str\">\", \"</span>.<span class=\"fn\">join</span>(items)   <span class=\"cm\"># join is a str method!</span>\ns.<span class=\"fn\">startswith</span>(<span class=\"str\">\"http\"</span>)\n<span class=\"str\">\"://\"</span> <span class=\"kw\">in</span> s          <span class=\"cm\"># in, not .contains()</span>"
+    },
+    {
+      "type": "insight",
+      "variant": "gotcha",
+      "title": "Strings Are Immutable — Don't += in a Loop",
+      "content": "Like Java, Python <code>str</code> is immutable, so <code>result += piece</code> inside a loop builds a new string each iteration — O(n²), the same trap that makes you reach for <code>StringBuilder</code>. The Pythonic <code>StringBuilder</code> is <code>\"\".join(parts)</code>: collect pieces in a list, then join once. Note <code>join</code> is a method <em>on the separator</em> (<code>\", \".join(items)</code>), which surprises every Java dev."
+    },
+    {
+      "type": "comparison",
+      "java": "<span class=\"cm\">// Format specifiers via String.format</span>\n<span class=\"type\">String</span>.<span class=\"fn\">format</span>(<span class=\"str\">\"%.2f\"</span>, <span class=\"num\">3.14159</span>);   <span class=\"cm\">// 3.14</span>\n<span class=\"type\">String</span>.<span class=\"fn\">format</span>(<span class=\"str\">\"%,d\"</span>, <span class=\"num\">1000000</span>);   <span class=\"cm\">// 1,000,000</span>\n<span class=\"type\">String</span>.<span class=\"fn\">format</span>(<span class=\"str\">\"%10s\"</span>, <span class=\"str\">\"hi\"</span>);     <span class=\"cm\">// right-align</span>",
+      "python": "<span class=\"cm\"># Format spec lives after a colon in the brace</span>\n<span class=\"str\">f\"{3.14159:.2f}\"</span>      <span class=\"cm\"># 3.14</span>\n<span class=\"str\">f\"{1000000:,}\"</span>        <span class=\"cm\"># 1,000,000</span>\n<span class=\"str\">f\"{'hi':>10}\"</span>         <span class=\"cm\"># right-align width 10</span>\n<span class=\"str\">f\"{0.75:.1%}\"</span>         <span class=\"cm\"># 75.0% (percent)</span>"
+    },
+    {
+      "type": "table",
+      "headers": ["Java", "Python", "Note"],
+      "rows": [
+        ["<code>s.trim()</code>", "<code>s.strip()</code>", "Also <code>lstrip</code>/<code>rstrip</code>"],
+        ["<code>s.length()</code>", "<code>len(s)</code>", "Built-in, not a method"],
+        ["<code>s.charAt(i)</code>", "<code>s[i]</code>", "Returns a length-1 str"],
+        ["<code>s.substring(1,4)</code>", "<code>s[1:4]</code>", "Slicing"],
+        ["<code>s.replace(a,b)</code>", "<code>s.replace(a,b)</code>", "Same"],
+        ["<code>String.join(d,l)</code>", "<code>d.join(l)</code>", "Method on separator"],
+        ["<code>s.isBlank()</code>", "<code>not s.strip()</code>", "Truthiness"]
+      ]
+    },
+    {
+      "type": "quiz",
+      "question": "What is the Pythonic equivalent of building a String with StringBuilder in a loop?",
+      "options": [
+        "Use += on a str inside the loop — it's optimized",
+        "Collect pieces in a list and call separator.join(list) once",
+        "Use the StringBuilder class from the stdlib",
+        "f-strings automatically buffer concatenation"
+      ],
+      "correct": 1,
+      "explanation": "Python strings are immutable, so <code>+=</code> in a loop is O(n²) — the same reason you use <code>StringBuilder</code> in Java. The idiom is to append pieces to a <code>list</code> and then <code>\"\".join(pieces)</code> (or any separator) a single time at the end."
+    }
+  ]
+}
