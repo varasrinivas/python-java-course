@@ -77,7 +77,44 @@ To add a visual to an existing module:
 ## Manual Build
 
 ```bash
-node scripts/validate.js        # Check all modules
-node scripts/build.js            # Build HTML
-node scripts/build.js --out custom-path.html
+node scripts/validate.js         # Check all modules
+node scripts/build.js            # Build into output/
+node scripts/build.js --out dist # Override the output root directory
 ```
+
+The build emits a deployable, S3-friendly tree:
+
+```
+output/
+├── index.html          ← landing page (links to both versions)
+├── desktop/index.html  ← desktop course (side-by-side panes)
+└── mobile/index.html   ← mobile course (stacked, swipe, bottom nav)
+```
+
+## Deploy
+
+`scripts/deploy.sh` does the whole release in one step: validate → build →
+S3 sync → CloudFront invalidation → git commit & push.
+
+```bash
+bash scripts/deploy.sh "optional commit message"
+```
+
+Flags: `--no-git`, `--no-cf`, `--no-s3`, `--dry-run` (preview without changing anything).
+
+Configurable via environment variables (defaults shown):
+
+| Var | Default | Purpose |
+|-----|---------|---------|
+| `BUCKET` | `learnings.varasrinivas.com` | Target S3 bucket |
+| `PREFIX` | `python-java-course` | Key prefix / sub-folder |
+| `DISTRIBUTION_ID` | `ESC8HMAS41DRF` | CloudFront distribution to invalidate |
+
+Requires `node`, a configured `aws` CLI, and `git`. The CloudFront step is
+non-fatal — if the deploy credentials lack `cloudfront:CreateInvalidation`,
+S3 is still updated and the CDN cache expires via its TTL.
+
+Live site:
+- Landing — https://learnings.varasrinivas.com/python-java-course/
+- Desktop — https://learnings.varasrinivas.com/python-java-course/desktop/
+- Mobile — https://learnings.varasrinivas.com/python-java-course/mobile/
