@@ -290,6 +290,7 @@ function closeSidebar() { document.getElementById('sidebar').classList.remove('o
 function goTo(i) {
   if (currentMod !== i) completed.add(currentMod);
   currentMod = Math.max(0, Math.min(MODS.length-1, i));
+  syncHash();
   updateUI();
   closeSidebar();
 }
@@ -317,7 +318,22 @@ document.getElementById('mainContent').addEventListener('touchend', e => {
   touchX = touchY = null;
 }, {passive: true});
 
-updateUI();
+// Deep-linking: keep the URL hash in sync with the current module (…/#program-structure)
+function syncHash(){ var m = MODS[currentMod]; if (m && m.slug && decodeURIComponent(location.hash).replace(/^#/,'') !== m.slug) location.hash = m.slug; }
+function moduleIdxFromHash(){
+  var h = decodeURIComponent(location.hash || '').replace(/^#/,'').toLowerCase();
+  if (!h) return -1;
+  return MODS.findIndex(function(m){ return m.slug === h || String(m.id).toLowerCase() === h; });  // pretty slug or numeric id
+}
+function goToHash(){ var i = moduleIdxFromHash(), t = i >= 0 ? i : 0; if (t !== currentMod) goTo(t); }
+window.addEventListener('hashchange', goToHash);
+(function(){  // boot — honor a #slug deep link, else module 0 (without marking it completed)
+  var b = moduleIdxFromHash();
+  currentMod = b >= 0 ? b : 0;
+  var m = MODS[currentMod];
+  if (m && m.slug && decodeURIComponent(location.hash).replace(/^#/,'') !== m.slug) history.replaceState(null, '', '#' + m.slug);
+  updateUI();
+})();
 </script>
 </body>
 </html>

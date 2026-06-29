@@ -328,7 +328,8 @@ const MODS = [
           ]
         ]
       }
-    ]
+    ],
+    "slug": "welcome"
   },
   {
     "id": "01-program-structure",
@@ -387,7 +388,8 @@ const MODS = [
         "correct": 2,
         "explanation": "Python uses consistent indentation (typically 4 spaces) to define code blocks. The colon <code>:</code> marks the start, then everything indented underneath belongs to that block."
       }
-    ]
+    ],
+    "slug": "program-structure"
   },
   {
     "id": "02-types-variables",
@@ -490,7 +492,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Python's <code>float</code> is a 64-bit IEEE-754 double — exactly like Java's <code>double</code>. So <code>0.1 + 0.2</code> is <code>0.30000000000000004</code> and the comparison is <code>False</code>. For exact money math, use <code>decimal.Decimal</code> just as you'd reach for <code>BigDecimal</code> in Java."
       }
-    ]
+    ],
+    "slug": "types-variables"
   },
   {
     "id": "03-collections",
@@ -598,7 +601,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Just like assigning one Java <code>List</code> reference to another, <code>b = a</code> makes both names point at the <em>same</em> list object — it never copies. Mutating through <code>b</code> is visible through <code>a</code>. To get an independent list use <code>a.copy()</code> or <code>a[:]</code>."
       }
-    ]
+    ],
+    "slug": "collections"
   },
   {
     "id": "04-control-flow",
@@ -702,7 +706,8 @@ const MODS = [
         "correct": 1,
         "explanation": "It's Python's conditional expression, the direct analog of Java's ternary <code>score >= 90 ? \"A\" : \"B\"</code> — but written value-first: the result if true, then <code>if condition</code>, then <code>else</code> result."
       }
-    ]
+    ],
+    "slug": "control-flow"
   },
   {
     "id": "05-functions",
@@ -823,7 +828,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Default argument values are evaluated <strong>once</strong>, when the function is defined — not on each call. So a mutable default like <code>[]</code> is the <em>same</em> object every call and accumulates state. The fix: default to <code>None</code> and create a fresh list inside the body."
       }
-    ]
+    ],
+    "slug": "functions"
   },
   {
     "id": "06-oop-classes",
@@ -950,7 +956,8 @@ const MODS = [
         "correct": 2,
         "explanation": "<code>self</code> is an ordinary parameter (not a keyword) that, by convention, is the first parameter of every instance method. Python passes the instance to it automatically when you call <code>obj.method()</code>, so you write <code>self</code> in the <em>definition</em> but never at the call site. It's required in <em>every</em> instance method, not just <code>__init__</code>."
       }
-    ]
+    ],
+    "slug": "oop-classes"
   },
   {
     "id": "07-exception-handling",
@@ -1063,7 +1070,8 @@ const MODS = [
         "correct": 1,
         "explanation": "The <code>with</code> statement is Python's try-with-resources. Any object implementing the context manager protocol (<code>__enter__</code>/<code>__exit__</code>) — like a file from <code>open()</code> — is cleaned up automatically when the block exits, even on exception. It's cleaner than a manual <code>finally</code>."
       }
-    ]
+    ],
+    "slug": "exception-handling"
   },
   {
     "id": "08-comprehensions-generators",
@@ -1146,7 +1154,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Square brackets create a <strong>list</strong> immediately (all values computed and stored). Parentheses create a <strong>generator expression</strong> — lazy, computing each value on demand, like a Java <code>Stream</code>. The generator uses constant memory and can be infinite, but is single-use."
       }
-    ]
+    ],
+    "slug": "comprehensions-generators"
   },
   {
     "id": "09-file-io",
@@ -1249,7 +1258,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Without an explicit <code>encoding</code>, Python falls back to the OS default — UTF-8 on most Linux/Mac, but often cp1252 on Windows. That produces mojibake or <code>UnicodeDecodeError</code> that only appears on certain machines. Always specify <code>encoding=\"utf-8\"</code>, unlike Java's <code>Files.readString</code> which already defaults to UTF-8."
       }
-    ]
+    ],
+    "slug": "file-io"
   },
   {
     "id": "10-packages-environments",
@@ -1363,7 +1373,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Maven scopes dependencies per project automatically, but <code>pip</code> installs into a shared global location by default. Two projects needing different versions of the same library will conflict. A <code>venv</code> gives each project its own isolated interpreter and package set — the per-project isolation Maven gave you for free."
       }
-    ]
+    ],
+    "slug": "packages-environments"
   },
   {
     "id": "11-decorators",
@@ -1435,7 +1446,8 @@ const MODS = [
         "correct": 1,
         "explanation": "A Java annotation is inert metadata — nothing happens unless a framework uses reflection to find and act on it. A Python decorator is a higher-order function that receives the decorated object and returns a replacement, so <code>@log_calls</code> immediately rewires behavior with no container or reflection involved."
       }
-    ]
+    ],
+    "slug": "decorators"
   },
   {
     "id": "12-testing",
@@ -1543,7 +1555,8 @@ const MODS = [
         "correct": 2,
         "explanation": "pytest uses <strong>discovery by convention</strong>: it collects functions named <code>test_*</code> in files named <code>test_*.py</code> (or <code>*_test.py</code>). There's no <code>@Test</code> annotation and no required base class. The flip side is a gotcha — misname the function and it's silently skipped."
       }
-    ]
+    ],
+    "slug": "testing"
   },
   {
     "id": "13-strings-formatting",
@@ -1635,7 +1648,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Python strings are immutable, so <code>+=</code> in a loop is O(n²) — the same reason you use <code>StringBuilder</code> in Java. The idiom is to append pieces to a <code>list</code> and then <code>\"\".join(pieces)</code> (or any separator) a single time at the end."
       }
-    ]
+    ],
+    "slug": "strings-formatting"
   },
   {
     "id": "14-dates-times",
@@ -1722,7 +1736,8 @@ const MODS = [
         "correct": 1,
         "explanation": "<code>datetime.now()</code> is <strong>naive</strong> — it carries no timezone, unlike Java's always-UTC <code>Instant</code>. Naive and timezone-aware datetimes can't be compared or subtracted, and naive values silently assume local time. Using <code>datetime.now(timezone.utc)</code> gives an unambiguous, aware timestamp."
       }
-    ]
+    ],
+    "slug": "dates-times"
   },
   {
     "id": "15-collections-module",
@@ -1804,7 +1819,8 @@ const MODS = [
         "correct": 1,
         "explanation": "A plain <code>dict</code> raises <code>KeyError</code> on a missing key. <code>defaultdict(list)</code> calls the factory (<code>list</code>) to create and store an empty list on first access — exactly the behavior you'd hand-roll with Java's <code>computeIfAbsent(k, x -&gt; new ArrayList&lt;&gt;())</code>, but automatic."
       }
-    ]
+    ],
+    "slug": "collections-module"
   },
   {
     "id": "16-logging",
@@ -1891,7 +1907,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Just as you wouldn't configure Logback from inside a library, Python libraries should only obtain a logger with <code>getLogger(__name__)</code> and never configure handlers. The <strong>application</strong> sets level/format/handlers once at startup (e.g. <code>logging.basicConfig(...)</code> or <code>dictConfig</code>), keeping output control with the app that runs the code."
       }
-    ]
+    ],
+    "slug": "logging"
   },
   {
     "id": "17-enums",
@@ -1933,7 +1950,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Enum members are singletons, so the idiomatic check is <code>s is Status.ACTIVE</code> (or <code>==</code>). Comparing to the raw value (<code>1</code> or <code>\"ACTIVE\"</code>) fails for a plain <code>Enum</code> — that only works if you deliberately subclass <code>IntEnum</code>/<code>StrEnum</code>. There's no <code>.equals()</code> in Python."
       }
-    ]
+    ],
+    "slug": "enums"
   },
   {
     "id": "18-regex",
@@ -2020,7 +2038,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Despite the name, <code>re.match()</code> is <strong>not</strong> Java's <code>matches()</code> — it anchors only at the <em>start</em> of the string (closer to <code>Matcher.lookingAt()</code>). To find a match anywhere use <code>re.search()</code> (≈ <code>find()</code>); to require the entire string match use <code>re.fullmatch()</code>."
       }
-    ]
+    ],
+    "slug": "regex"
   },
   {
     "id": "19-context-managers",
@@ -2102,7 +2121,8 @@ const MODS = [
         "correct": 1,
         "explanation": "<code>__exit__</code> receives the active exception (if any) and its return value decides its fate: <strong>truthy</strong> suppresses it, <strong>falsy</strong> (<code>False</code>/<code>None</code>) lets it propagate. Java's <code>AutoCloseable.close()</code> has no such power — it can't decide whether the original exception survives."
       }
-    ]
+    ],
+    "slug": "context-managers"
   },
   {
     "id": "20-cli-argparse",
@@ -2144,7 +2164,8 @@ const MODS = [
         "correct": 1,
         "explanation": "<code>action=\"store_true\"</code> defines a boolean flag — passing <code>--verbose</code> sets <code>args.verbose</code> to <code>True</code>, omitting it leaves <code>False</code>. No value is consumed after it. (For a repeat-count flag like <code>-vvv</code> you'd use <code>action=\"count\"</code>.)"
       }
-    ]
+    ],
+    "slug": "cli-argparse"
   },
   {
     "id": "21-typing-deep-dive",
@@ -2231,7 +2252,8 @@ const MODS = [
         "correct": 1,
         "explanation": "The CPython interpreter ignores annotations at runtime (just as the JVM erases generics). Their value comes from <strong>static analysis</strong> — <code>mypy</code>/<code>pyright</code> in your editor and CI catch type mismatches before execution. They're checked documentation, not runtime guards (libraries like pydantic add runtime validation separately)."
       }
-    ]
+    ],
+    "slug": "typing-deep-dive"
   },
   {
     "id": "22-essential-libraries",
@@ -2317,7 +2339,8 @@ const MODS = [
         "correct": 1,
         "explanation": "<code>requests</code> blocks indefinitely by default if a server never responds, so always pass a <code>timeout</code>. (<code>verify=False</code> disables TLS verification — the opposite of what you want.) Pair it with <code>raise_for_status()</code> and a reusable <code>Session</code> for robust, efficient HTTP."
       }
-    ]
+    ],
+    "slug": "essential-libraries"
   },
   {
     "id": "23-pydantic",
@@ -2359,7 +2382,8 @@ const MODS = [
         "correct": 1,
         "explanation": "A normal class treats hints as inert documentation. A pydantic <code>BaseModel</code> uses them as a live schema — it coerces and validates input when you create or <code>model_validate</code> an instance, raising a detailed <code>ValidationError</code> on bad data. That makes it ideal for untrusted boundaries (API bodies, config, queue messages)."
       }
-    ]
+    ],
+    "slug": "pydantic"
   },
   {
     "id": "24-fastapi",
@@ -2450,7 +2474,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Declaring a parameter typed as a pydantic <code>BaseModel</code> tells FastAPI to parse and validate the request body against it (returning 422 on bad data) and to publish that structure in the auto-generated OpenAPI docs at <code>/docs</code>. The type hints do the work — no separate schema file, no <code>@RequestBody</code> needed."
       }
-    ]
+    ],
+    "slug": "fastapi"
   },
   {
     "id": "25-databases",
@@ -2551,7 +2576,8 @@ const MODS = [
         "correct": 1,
         "explanation": "Pass the value through the driver's <strong>placeholder</strong> (<code>?</code> for sqlite3, <code>%s</code> for psycopg) with the value in a separate params tuple — the DB-API equivalent of a JDBC <code>PreparedStatement</code>. Interpolating the value into the SQL string (f-string or concatenation) is the classic SQL-injection hole."
       }
-    ]
+    ],
+    "slug": "databases"
   }
 ];
 
@@ -2746,6 +2772,7 @@ function updateUI() {
 function goTo(i) {
   if (currentMod !== i) completed.add(currentMod);
   currentMod = i;
+  syncHash();
   updateUI();
   document.getElementById('sidebar').classList.remove('open');
 }
@@ -2762,7 +2789,22 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
 });
 
-updateUI();
+// Deep-linking: keep the URL hash in sync with the current module (…/#program-structure)
+function syncHash(){ var m = MODS[currentMod]; if (m && m.slug && decodeURIComponent(location.hash).replace(/^#/,'') !== m.slug) location.hash = m.slug; }
+function moduleIdxFromHash(){
+  var h = decodeURIComponent(location.hash || '').replace(/^#/,'').toLowerCase();
+  if (!h) return -1;
+  return MODS.findIndex(function(m){ return m.slug === h || String(m.id).toLowerCase() === h; });  // pretty slug or numeric id
+}
+function goToHash(){ var i = moduleIdxFromHash(), t = i >= 0 ? i : 0; if (t !== currentMod) goTo(t); }
+window.addEventListener('hashchange', goToHash);
+(function(){  // boot — honor a #slug deep link, else module 0 (without marking it completed)
+  var b = moduleIdxFromHash();
+  currentMod = b >= 0 ? b : 0;
+  var m = MODS[currentMod];
+  if (m && m.slug && decodeURIComponent(location.hash).replace(/^#/,'') !== m.slug) history.replaceState(null, '', '#' + m.slug);
+  updateUI();
+})();
 </script>
 </body>
 </html>

@@ -121,8 +121,16 @@ function build() {
     }
     const mod = loadJSON(modPath);
     if (!validateModule(mod, `${modId}.json`)) allValid = false;
+    if (!mod.slug) mod.slug = modId.replace(/^\d+[-_]/, '');  // pretty deep-link slug from filename (00-welcome → welcome)
     modules.push(mod);
   });
+
+  // slugs must be unique — they're used as URL fragments for deep-linking
+  const slugs = modules.map(m => m.slug);
+  if (new Set(slugs).size !== slugs.length) {
+    console.error(`❌ Duplicate module slugs: ${slugs.filter((s, i) => slugs.indexOf(s) !== i).join(', ')}`);
+    process.exit(1);
+  }
 
   console.log(`✅ Loaded ${modules.length} / ${config.moduleOrder.length} modules\n`);
 
